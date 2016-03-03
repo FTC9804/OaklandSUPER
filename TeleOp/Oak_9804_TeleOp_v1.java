@@ -41,9 +41,13 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
     Servo grabRight;
 
     
-    //servo to drop arm for climbers
+    //servo to score blocks in the goal
     Servo box;
 
+    //servo for autonomous for the climbers
+    Servo beaconDump;
+
+    //servo to activate the hanger grabbers
     Servo hangArms;
     
     //servo for debris sweeping away
@@ -60,7 +64,8 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
     double grabLeftDown = 0.6;              //0.6 is approx. 90 degrees CW (DOWN on left side)
     double grabRightUp = 1.0;               //1 is max CW (UP on right side)
     double grabRightDown = 0.4;             //0.4 is approx. 90 degrees CCW (DOWN on right side)
-    
+
+    //servo variables for the hanging servo
     double hangOut = 1.0;
     double hangIn = 0.0;
     double hangPosition = hangIn;
@@ -70,7 +75,13 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
     double boxMovingUp = 0.2;
     double boxStopMoving = 0.51;
     double boxPower = 0.51;
-    
+
+    //servo variables to place the climber into the dump area behind the beacon in auto
+    double beaconDumpScored = 0.0;
+    double beaconDumpRetracted = 1.0;
+    double beaconDumpPosition = beaconDumpRetracted;
+
+    //servo variables for the window wiper to sweep away blocks from the ramp
     double windowWiperOpened = 0.75;
     double windowWiperClosed = 0;
     double windowWiperPosition = windowWiperClosed;
@@ -89,22 +100,10 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
     
     double joystick1ValueRight;
     double joystick1ValueLeft;
-    
-    //these are declarations for proportional winch to arm power
-    int initialWinchPosition;            //initial position of the winch
-    int currentWinchEncoderCounts;        //encoder counts for the winch motor
-    int initialArmPosition;                //initial position of the arms
-    int currentArmEncoderCounts;            //encoder counts for the arms motor
-    double armsSpeedGain = 5;            //need better estimate
-    double currentWinchSpeed;                //calculated speed for winch
-    double currentArmsSpeed;                //calculated speed for arms
-    double targetArmsSpeed;                    //desired speed for arms
-    double armsSpeedError;                    //error between target and current speeds
-    double armsMotorPower;                    //power giving to the arms
+
     boolean redTeam = true;
     boolean blueTeam = false;
-    long currentTime;
-    
+
     @Override
     public void init() {
         
@@ -148,7 +147,7 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
         hangArms = hardwareMap.servo.get("s3");
         box = hardwareMap.servo.get("s4");
         windowWiper = hardwareMap.servo.get("s5");
-        
+        beaconDump = hardwareMap.servo.get("s6");
 
         //sets initial positions for the servos to activate to
         grabLeft.setPosition(grabLeftUp);
@@ -156,7 +155,7 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
         windowWiper.setPosition(windowWiperClosed);
         box.setPosition(boxStopMoving);
         hangArms.setPosition(hangIn);
-        
+        beaconDump.setPosition(beaconDumpPosition);
 
         this.resetStartTime();     //reset to allow time for servos to reach initialized positions
         
@@ -172,8 +171,8 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
     @Override
     public void loop() {
         //creates boolean value for magnetic sensor,
-        //true = no magnet detected nearby
-        //false = have reached limit
+        //true (1)= no magnet detected nearby
+        //false (0) = magnet detected
         armsNotExtended = sensorExtend.getState();
         armsNotRetracted = sensorRetract.getState();
 
@@ -317,11 +316,11 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
 
         // Arm and Winch extension
         
-        if (gamepad2.dpad_up || gamepad1.dpad_up) {      //moves arms and winches with d-pad buttons,
+        if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms and winches with d-pad buttons,
 
             arms.setPower(-1);
             
-        } else if ((gamepad2.dpad_down || gamepad1.dpad_down) && !armsNotRetracted) {
+        } else if ((gamepad2.dpad_down || gamepad1.dpad_down) && armsNotRetracted) {
             
             arms.setPower(1);
         } else {
