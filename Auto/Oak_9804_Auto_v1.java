@@ -5,8 +5,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-/* Made by the programmers of FTC Team 9804 Bomb Squad
- *v1 3-5-16 at 5:37 pm Steve -- test code with additional servos to drive for set distance
+/*
+ * FTC Team 9804 Bomb Squad Autonomous
+ * Made by the programmers of FTC Team 9804 Bomb Squad
+ *
+ * Drives a predetermined set distance
+ *
+ * v1 3-5-16 at 5:37 pm Steve -- test code with additional servos to drive for set distance; corrected the effective dia of wheel
+ *
+ *
+ * GENERAL RULE:
+ *  FWD: leftPower = midPower - driveSteering;
+ *  BWD: leftPower = midPower + drive Steering
  */
 
 
@@ -42,7 +52,7 @@ public class Oak_9804_Auto_v1 extends LinearOpMode {
     int currentEncCountLeft;
     int currentEncCountRight;
 
-    
+
     double targetDistance;                      //magnitude in distance
     final int encoderCountsPerRotation = 1120;
     final double diameter = 2.583;       //effective diameter of drive pulley and tread b/c of sinking into foam mat (measures 3" dia)
