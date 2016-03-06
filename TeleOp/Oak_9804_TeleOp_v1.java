@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *v2 3-5-16 at 5:06 pm Etienne L. -added all clear servo
  */
 
-public class Oak_9804_TeleOp_v1 extends OpMode {
+public class Oak_9804_TeleOp_v2 extends OpMode {
 
     //defining the motors, servos, and variables in this program
 
