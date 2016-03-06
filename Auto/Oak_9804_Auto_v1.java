@@ -49,8 +49,8 @@ public class Oak_9804_Auto_v1 extends LinearOpMode {
     int headingError;
     double driveSteering;
     double currentDistance;
-    int currentEncCountLeft;
-    int currentEncCountRight;
+    int currentEncDeltaCountLeft;
+    int currentEncDeltaCountRight;
 
 
     double targetDistance;                      //magnitude in distance
@@ -67,9 +67,7 @@ public class Oak_9804_Auto_v1 extends LinearOpMode {
 
     //servo variables
     double grabLeftUp = 0;                  //0 is max CCW (UP on left side)
-    double grabLeftDown = 0.6;              //0.6 is approx. 90 degrees CW (DOWN on left side)
     double grabRightUp = 1.0;               //1 is max CW (UP on right side)
-    double grabRightDown = 0.4;             //0.4 is approx. 90 degrees CCW (DOWN on right side)
     double sweepOpened = 0.75;
     double sweepClosed = 0;
     double sweepPosition = sweepClosed;
@@ -158,20 +156,20 @@ public class Oak_9804_Auto_v1 extends LinearOpMode {
         do {
             spin.setPower(1);  // Eject debris while driving, to clear path
 
-            currentEncCountLeft = driveLeftBack.getCurrentPosition() - initialEncCountLeft;         //the current - initial will give the
-            currentEncCountRight = driveRightBack.getCurrentPosition() - initialEncCountRight;      //current distance of the encoders
+            currentEncDeltaCountLeft = driveLeftBack.getCurrentPosition() - initialEncCountLeft;         //the current - initial will give the
+            currentEncDeltaCountRight = driveRightBack.getCurrentPosition() - initialEncCountRight;      //current distance of the encoders
 
             waitOneFullHardwareCycle();         //allow time for the hardware to execute its task
 
-            EncErrorLeft = targetEncoderCounts - Math.abs(currentEncCountLeft);                     //the error is the delta between the target counts and current counts
+            EncErrorLeft = targetEncoderCounts - Math.abs(currentEncDeltaCountLeft);                     //the error is the delta between the target counts and current counts
 
 
             //telemetry for encoder information
             telemetry.addData("EncErrorLeft = ", EncErrorLeft);
-            telemetry.addData("Left Encoder: ", currentEncCountLeft);
+            telemetry.addData("Left Encoder: ", currentEncDeltaCountLeft);
 
             //telemetry for the distance travelled (IN INCHES)
-            currentDistance = (currentEncCountLeft * circumference) / encoderCountsPerRotation;
+            currentDistance = (currentEncDeltaCountLeft * circumference) / encoderCountsPerRotation;
             telemetry.addData("Calculated current distance: ", currentDistance);
 
             // get the Z-axis heading info.
