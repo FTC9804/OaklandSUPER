@@ -31,6 +31,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  * GENERAL RULE:
  *  FWD: leftPower = midPower - driveSteering;
  *  BWD: leftPower = midPower + drive Steering
+ *  CCW: positive
+ *  CW: negative
  */
 
 
@@ -482,7 +484,7 @@ public class Oak_9804_RED_Auto_DELAY_NearFar_v2 extends LinearOpMode {
         } while (EncErrorLeft > 0 && this.getRuntime() < 8);
 
 
-        telemetry.addData("STRAIGHT 2 DONE", telemetryVariable);
+        telemetry.addData("STRAIGHT 3 DONE", telemetryVariable);
 
         //set all motor powers to 0 after drive code finished running
         driveLeftBack.setPower(0.0);
