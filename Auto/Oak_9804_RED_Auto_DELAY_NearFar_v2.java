@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Facing the shelter BACKWARDS
  *
  * Movement:
+ * Delay 15 seconds
  * Drive for 1.5*2*sqrt(2)*12 = 50.9117 inches backwards with spin motors running
  * Spins CW 90º
  * drive FORWARDS 24 inches
@@ -33,7 +34,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
+public class Oak_9804_RED_Auto_DELAY_NearFar_v2 extends LinearOpMode {
 
     //drive motors
     DcMotor driveLeftBack;
@@ -134,6 +135,15 @@ public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
         driveRightBack.setDirection(DcMotor.Direction.REVERSE);
         driveRightFront.setDirection(DcMotor.Direction.REVERSE);
         //2 encoders are on rear motors, two are mounted in tread module
+
+
+        //DELAY 15 SECONDS
+
+        //allow time to read encoder value
+        for (int i = 0; i < 10; i++) {
+            waitOneFullHardwareCycle();
+        }
+
 
 
         //DRIVE BACKWARDS 50.9117 INCHES

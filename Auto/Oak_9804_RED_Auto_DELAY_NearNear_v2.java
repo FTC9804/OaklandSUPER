@@ -12,17 +12,17 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Drives a predetermined set distance
  *
  * v1 3-5-16 at 5:37 pm Steve -- test code with additional servos to drive for set distance; corrected the effective dia of wheel
- * v2 3-5-16 at 9:14 pm Steve -- test code for near->far red
+ * v2 3-5-16 at 8:22 pm Steve -- test code for near->near red
  *
  *
  * SetUp:
- * Back left edge of second full box from the mountain on the red side
+ * Back left edge of first full box from the mountain on the red side
  * Facing the shelter BACKWARDS
  *
  * Movement:
- * Drive for 1.5*2*sqrt(2)*12 = 50.9117 inches backwards with spin motors running
+ * Delays 15 seconds
+ * Drive for 2*sqrt(2)*12 = 33.94 inches backwards with spin motors running
  * Spins CW 90º
- * drive FORWARDS 24 inches
  * window wiper servo
  * drive FORWARDS 24 inches
  *
@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
+public class Oak_9804_RED_Auto_DELAY_NearNear_v2 extends LinearOpMode {
 
     //drive motors
     DcMotor driveLeftBack;
@@ -136,7 +136,17 @@ public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
         //2 encoders are on rear motors, two are mounted in tread module
 
 
-        //DRIVE BACKWARDS 50.9117 INCHES
+
+        //DELAY 15 SECONDS
+
+        //allow time to read encoder value
+        for (int i = 0; i < 10; i++) {
+            waitOneFullHardwareCycle();
+        }
+
+
+
+        //DRIVE BACKWARDS 33.94 INCHES
 
         telemetry.clearData();      //clear all telemtry data before starting
 
@@ -145,7 +155,7 @@ public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
         midPower = 0.5;             //the midpower with which we add and subtract the drive steering from
         targetHeading = 0;              //drive straight ahead at the initial/default heading
 
-        targetDistance = 50.9117;          //drive straight 50.9117 inches
+        targetDistance = 33.94;          //drive straight 33.94 inches
 
         //math for target encoder counts to travel
         rotations = targetDistance / circumference;
@@ -297,94 +307,6 @@ public class Oak_9804_RED_Auto_NearFar_v2 extends LinearOpMode {
         while(this.getRuntime() < 10){
             waitOneFullHardwareCycle();
         }
-
-
-        //DRIVE FORWARD 24 INCHES
-        telemetry.clearData();
-
-        midPower = 0.66;            //default value for driving, adjusted by steering
-        driveGain = 0.05;           //gain used for proportional steering
-        targetHeading = -90;        //drive straight ahead, same heading
-
-        targetDistance = 24;
-        rotations = targetDistance/circumference;
-        targetEncoderCounts = (int)(encoderCountsPerRotation*rotations);
-
-        initialEncCountLeft = driveLeftBack.getCurrentPosition();
-        initialEncCountRight = driveRightBack.getCurrentPosition();
-
-        //allow time to read encoder value
-        for (int i = 0; i < 10; i++) {
-            waitOneFullHardwareCycle();
-        }
-
-        this.resetStartTime();      //for safety timeout
-
-        //loop until driving distance reached (or safety timeout)
-        do {
-            currentEncDeltaCountLeft = driveLeftBack.getCurrentPosition() - initialEncCountLeft;
-            currentEncDeltaCountRight = driveRightBack.getCurrentPosition() - initialEncCountRight;
-            waitOneFullHardwareCycle();
-
-            EncErrorLeft = targetEncoderCounts - Math.abs(currentEncDeltaCountLeft);
-
-            telemetry.addData("Left Encoder Delta:", currentEncDeltaCountLeft);
-
-            currentDistance = (currentEncDeltaCountLeft/encoderCountsPerRotation) * circumference;
-
-            telemetry.addData("Calculated current distance: ", currentDistance);
-
-            currentHeading = gyro.getIntegratedZValue();
-
-            telemetry.addData("current signed heading: ", currentHeading);
-
-            headingError = targetHeading - currentHeading;      //positive if pointing too far CW
-
-            driveSteering = headingError * driveGain;           //positive if pointing too far CW
-
-            leftPower = midPower - driveSteering;
-            if (leftPower > 1) {
-                leftPower = 1;
-            }
-            if (leftPower < 0.2) {
-                leftPower = 0.2;
-            }
-
-
-            rightPower = midPower + driveSteering;
-            if (rightPower > 1) {
-                rightPower = 1;
-            }
-            if (rightPower < 0.2) {
-                rightPower = 0.2;
-            }
-
-            //when driving forward, left front is leading, left back is now trailing, same for right
-            //trailing gets full power
-            driveLeftFront.setPower(0.95 * leftPower);
-            driveLeftBack.setPower(leftPower);
-            driveRightFront.setPower(0.95 * rightPower);
-            driveRightBack.setPower(rightPower);
-
-            waitOneFullHardwareCycle();
-
-        } while (EncErrorLeft > 0 && this.getRuntime() < 8);
-
-
-        telemetry.addData("STRAIGHT 2 DONE", telemetryVariable);
-
-        //set all motor powers to 0 after drive code finished running
-        driveLeftBack.setPower(0.0);
-        driveLeftFront.setPower(0.0);
-        driveRightBack.setPower(0.0);
-        driveRightFront.setPower(0.0);
-        spin.setPower(0);
-
-        this.resetStartTime();
-        while(this.getRuntime() < 10){
-            waitOneFullHardwareCycle();
-        }
-
 
 
         //CLEAR DEBRIS WITH WINDOW WIPER

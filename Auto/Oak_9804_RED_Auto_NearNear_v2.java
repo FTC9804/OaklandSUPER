@@ -19,6 +19,8 @@ import com.qualcomm.robotcore.robocol.Telemetry;
  * SetUp:
  * Back left edge of first full box from the mountain on the red side
  * Facing the shelter BACKWARDS
+ *
+ * Movement:
  * Drive for 2*sqrt(2)*12 = 33.94 inches backwards with spin motors running
  * Spins CW 90º
  * window wiper servo
