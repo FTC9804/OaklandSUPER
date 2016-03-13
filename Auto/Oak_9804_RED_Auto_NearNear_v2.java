@@ -30,6 +30,8 @@ import com.qualcomm.robotcore.robocol.Telemetry;
  * GENERAL RULE:
  *  FWD: leftPower = midPower - driveSteering;
  *  BWD: leftPower = midPower + drive Steering
+ *  CCW: positive
+ *  CW: negative
  */
 
 

@@ -11,18 +11,17 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  * Drives a predetermined set distance
  *
- * v1 3-5-16 at 5:37 pm Steve -- test code with additional servos to drive for set distance; corrected the effective dia of wheel
- * v2 3-5-16 at 8:22 pm Steve -- test code for near->near red
+ * v1 3-12-16 at 7:01 pm Steve -- test code for delayed near->near blue
  *
  *
  * SetUp:
- * Back left edge of first full box from the mountain on the red side
+ * Back right edge of first full box from the mountain on the blue side
  * Facing the shelter BACKWARDS
  *
  * Movement:
  * Delays 15 seconds
  * Drive for 2*sqrt(2)*12 = 33.94 inches backwards with spin motors running
- * Spins CW 90º
+ * Spins CCW 90º
  * window wiper servo
  * drive FORWARDS 24 inches
  *
@@ -35,7 +34,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_DELAY_NearNear_v2 extends LinearOpMode {
+public class Oak_9804_BLUE_Auto_DELAY_NearNear_v1 extends LinearOpMode {
 
     //drive motors
     DcMotor driveLeftBack;
@@ -248,10 +247,10 @@ public class Oak_9804_RED_Auto_DELAY_NearNear_v2 extends LinearOpMode {
             waitOneFullHardwareCycle();
         }
 
-        //SPIN CW 90º
+        //SPIN CCW 90º
         midPower = 0;           //spin move, zero driving-forward power
         driveGain = 0.05;       //OK for spin
-        targetHeading = -90;    //90º CW (using signed heading)
+        targetHeading = 90;    //90º CCW (using signed heading) (positive value CCW)
 
         this.resetStartTime();
 
@@ -260,43 +259,43 @@ public class Oak_9804_RED_Auto_DELAY_NearNear_v2 extends LinearOpMode {
 
             telemetry.addData("current signed heading: ", currentHeading);
 
-            headingError = targetHeading - currentHeading;//for CW spin from 0 to -90º, error always negative
+            headingError = targetHeading - currentHeading;//for CCW spin from 0 to 90º, error always positive
 
-            driveSteering = headingError*driveGain;         //negative value
+            driveSteering = headingError*driveGain;         //positive value
 
-            //for CW spin, left tread runs forwards
+            //for CCW spin, left tread runs backwards
             leftPower = midPower - driveSteering;
-            if(leftPower > 1){
-                leftPower = 1 ;
+            if(leftPower > -1){
+                leftPower = -1 ;
             }
-            if (leftPower < 0.2){           //avoid zero closing power at low error
-                leftPower = 0.2;            //0.1 stalled near target heading
+            if (leftPower < -0.2){           //avoid zero closing power at low error
+                leftPower = -0.2;            //0.1 stalled near target heading
             }
 
 
-            //for CW spin, right tread runs backwards
+            //for CCW spin, right tread runs forwards
             rightPower = midPower + driveSteering;
-            if (rightPower < -1){
-                rightPower = -1;
+            if (rightPower < 1){
+                rightPower = 1;
             }
-            if (rightPower > -0.2){
-                rightPower = -0.2;
+            if (rightPower > 0.2){
+                rightPower = 0.2;
             }
 
-            //when spinning CW, left front is leading, left back is trailing
-            //right front is trailing, right back is leading
+            //when spinning CCW, left front is trailing, left back is leading
+            //right front is leading, right back is trailing
             //trailing gets full power
-            driveLeftFront.setPower(0.95 * leftPower);
-            driveLeftBack.setPower(leftPower);
-            driveRightFront.setPower(rightPower);
-            driveRightBack.setPower(0.95 * rightPower);
+            driveLeftFront.setPower(leftPower);
+            driveLeftBack.setPower(0.95 * leftPower);
+            driveRightFront.setPower(0.95 * rightPower);
+            driveRightBack.setPower(rightPower);
 
             waitOneFullHardwareCycle();
 
-        } while (currentHeading > targetHeading && this.getRuntime() < 60);
-        //spin from 0 to -90, so loop while 'greater than' the target heading
+        } while (currentHeading < targetHeading && this.getRuntime() < 60);
+        //spin from 0 to 90, so loop while 'less than' the target heading
 
-        telemetry.addData("SPIN MOVE 90 CW DONE", telemetryVariable);
+        telemetry.addData("SPIN MOVE 90 CCW DONE", telemetryVariable);
 
         //set all motor powers to 0 after drive code finished running
         driveLeftBack.setPower(0.0);
@@ -329,7 +328,7 @@ public class Oak_9804_RED_Auto_DELAY_NearNear_v2 extends LinearOpMode {
 
         midPower = 0.66;            //default value for driving, adjusted by steering
         driveGain = 0.05;           //gain used for proportional steering
-        targetHeading = -90;        //drive straight ahead, same heading
+        targetHeading = 90;        //drive straight ahead, same heading
 
         targetDistance = 24;
         rotations = targetDistance/circumference;
