@@ -1,0 +1,21 @@
+
+Recent summary of the team programmers' TeleOp code:
+
+1. A 'complete' version was posted here on Saturday March 5.
+
+2. On Sunday March 6, a 5-page detailed list of constructive comments and suggestions was posted at the 
+   team's Google Drive. It should be noted that the code would not compile.  Among other things it was
+   missing critical semi-colons, indicating that the latest version was not developed in Android Studio
+   or any other Java IDE.
+
+3. On Tuesday March 15, the 'updated version' of the code was posted here, reportedly with substantial
+   improvements made during the previous 9 days.  However this latest version, still named "v1",
+   is identical to the previous March 6 version, including for example the missing semicolons.
+   The explanations listed are: "computer changed some setup files" and "had to recommit, commit conflicts".
+
+4. The github history shows only a March 14 attempt to RENAME (!) the posted file from v1 to v2.
+   But there is no evidence of an actual updated file existing on github. Also no activity in the team
+   Google Drive, Programming folder.
+   
+  This note was posted Wednesday March 16 at 3 PM.
+  
