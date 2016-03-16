@@ -10,7 +10,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 /* Made by the programmers of FTC Team 9804 Bomb Squad
  *v1 3-2-16 at 7:58 pm Steve & Etienne -- created new Oakland tournament code with additional servos
- *v2 3-5-16 at 5:06 pm Etienne L. -added all clear servo
+ *v1 3-5-16 at 5:06 pm Etienne L. -added all clear servo
+ *v1 3-15-16 at 5:40 pm Etienne L. --added servo comments
  */
 
 public class Oak_9804_TeleOp_v1 extends OpMode {
@@ -43,27 +44,26 @@ public class Oak_9804_TeleOp_v1 extends OpMode {
 
 
     //servo to score blocks in the goal
-    Servo box;
+    Servo box;                            //CR servo
 
     //servo for autonomous for the climbers
-    Servo beaconDump;
+    Servo beaconDump;                     //CR servo
 
     //servo to activate the hanger grabbers
-    Servo hangArms;
+    Servo hangArms;                       //CR servo
 
     //servo for debris sweeping away
-    Servo windowWiper;
+    Servo windowWiper;                    //Standard Servo
 
     //servo for hitting the all clear
-    Servo allClear;
+    Servo allClear;                       //Standard Servo
 
     //variables for driving
     double trailingPowerRight;                //this code allows us to always give slightly
     double leadingPowerRight;                //less power to leading motor to always
     double trailingPowerLeft;                //ensure tension between the treads and
     double leadingPowerLeft;                //ground for maximum driver control
-
-    //servo variables for all clear sevo
+    //servo variables for all clear servo
 
     double allClearUp = 0.0;
     double allClearDown = 1.0;
