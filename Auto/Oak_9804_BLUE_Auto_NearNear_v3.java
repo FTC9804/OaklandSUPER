@@ -11,19 +11,18 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  * Drives a predetermined set distance
  *
- * v1 3-5-16 at 5:37 pm Steve -- test code with additional servos to drive for set distance; corrected the effective dia of wheel
- * v2 3-5-16 at 9:14 pm Steve -- test code for near->far red
- * v3 3-12-16 at 8:00 pm Steve -- test code for near->far red with methods
+ * v1 3-12-16 at 7:01 pm Steve -- test code for near->near blue
+ * v2 3-12-16 at 8:03 pm Steve -- test code for near->near blue with methods
+ * v3 3-15-16 at 6:42 pm Steve -- test code with methods set up in competition layout
  *
  *
  * SetUp:
- * Back left edge of second full box from the mountain on the red side
+ * Back right edge of first full box from the mountain on the blue side
  * Facing the shelter BACKWARDS
  *
  * Movement:
- * Drive for 1.5*2*sqrt(2)*12 = 50.9117 inches backwards with spin motors running
- * Spins CW 90º
- * drive FORWARDS 24 inches
+ * Drive for 2*sqrt(2)*12 = 33.94 inches backwards with spin motors running
+ * Spins CCW 90º
  * window wiper servo
  * drive FORWARDS 24 inches
  *
@@ -36,7 +35,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_NearFar_v3 extends LinearOpMode {
+public class Oak_9804_BLUE_Auto_NearNear_v3 extends LinearOpMode {
 
     //drive motors
     DcMotor driveLeftBack;
@@ -92,6 +91,7 @@ public class Oak_9804_RED_Auto_NearFar_v3 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         //USE CONFIGURATION FILE 'JABBED' ON BOTH MAIN AND B PHONES
 
         ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
@@ -112,21 +112,17 @@ public class Oak_9804_RED_Auto_NearFar_v3 extends LinearOpMode {
 
         motorOrientationEstablishment();
 
-        driveStraightBackwards(0, 50.9117);
+        driveStraightBackwards(0, 33.94);
 
         stopMotors();
 
-        spinMoveClockwise(-90);
-
-        stopMotors();
-
-        driveStraightForwards(-90, 24);
+        spinMoveCounterClockwise(90);
 
         stopMotors();
 
         windowWiperActivate();
 
-        driveStraightForwards(-90, 24);
+        driveStraightForwards(90, 24);
 
         stopMotors();
 
@@ -236,7 +232,7 @@ public class Oak_9804_RED_Auto_NearFar_v3 extends LinearOpMode {
 
             driveSteering = headingError*driveGain;         //positive value
 
-            //for CCW spin, left tread forward
+            //for CCW spin, left tread runs backwards
             leftPower = midPower - driveSteering;
             if(leftPower < -1){
                 leftPower = -1 ;
@@ -264,66 +260,11 @@ public class Oak_9804_RED_Auto_NearFar_v3 extends LinearOpMode {
             driveRightFront.setPower(0.95 * rightPower);
             driveRightBack.setPower(rightPower);
 
-        } while (currentHeading > targetHeading
+        } while (currentHeading < targetHeading
                 && this.getRuntime() < 60);
-        //spin from 0 to - number, so loop while 'greater than' the target heading
+        //spin from 0 to + number, so loop while 'less than' the target heading
 
-        telemetry.addData("SPIN CW DONE", telemetryVariable);
-
-    }
-
-    void spinMoveClockwise (int heading) {
-
-        //SPIN MOVE
-        ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
-
-        midPower = 0;           //spin move, zero driving-forward power
-        driveGain = 0.05;       //OK for spin
-        targetHeading = heading;    //90º CW (using signed heading) (positive value CCW)
-
-        this.resetStartTime();
-
-        do {
-            currentHeading = gyro.getIntegratedZValue();
-
-            telemetry.addData("current signed heading: ", currentHeading);
-
-            headingError = targetHeading - currentHeading;//for CW spin from 0 to -90º, error always negative
-
-            driveSteering = headingError*driveGain;         //negative value
-
-            //for CW spin, left tread runs forwards
-            leftPower = midPower - driveSteering;
-            if(leftPower > 1){
-                leftPower = 1 ;
-            }
-            if (leftPower < 0.2){           //avoid zero closing power at low error
-                leftPower = 0.2;            //0.1 stalled near target heading
-            }
-
-
-            //for CW spin, right tread runs backwards
-            rightPower = midPower + driveSteering;
-            if (rightPower < -1){
-                rightPower = -1;
-            }
-            if (rightPower > -0.2){
-                rightPower = -0.2;
-            }
-
-            //when spinning CW, left front is leading, left back is trailing
-            //right front is trailing, right back is leading
-            //trailing gets full power
-            driveLeftFront.setPower(0.95 * leftPower);
-            driveLeftBack.setPower(leftPower);
-            driveRightFront.setPower(rightPower);
-            driveRightBack.setPower(0.95 * rightPower);
-
-        } while (currentHeading > targetHeading
-                && this.getRuntime() < 60);
-        //spin from 0 to - number, so loop while 'greater than' the target heading
-
-        telemetry.addData("SPIN CW DONE", telemetryVariable);
+        telemetry.addData("SPIN 90 CCW DONE", telemetryVariable);
 
     }
 
