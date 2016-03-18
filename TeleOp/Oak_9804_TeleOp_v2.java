@@ -69,16 +69,16 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     //drive motors
     DcMotor driveLeftBack;               // there are 2 motors functioning in each tread and the tread
     DcMotor driveLeftFront;              //requires that the leading or front motor is powered at 95% of what
-    DcMotor driveRightBack;              // the Back or trailing motor is powered. Further on the right motors
-    DcMotor driveRightFront;             // are reversed because the left side goes forward with positive values.
-    // back or front DOES depend on which direction you are driving
-    //this is addressed later on in one statement while avoiding the joystick
-    //deadzones.
+    DcMotor driveRightBack;              // the Back or trailing motor is powered. Further on the left motors
+    DcMotor driveRightFront;             // are reversed because the right side goes forward with positive values.
+                                         // back or front DOES depend on which direction you are driving
+                                         //this is addressed later on in one statement while avoiding the joystick
+                                         //deadzones.
 
     //winch motors
-    DcMotor leftWinch;                   //in this verison of teleop code there are no functions to control the
-    DcMotor rightWinch;                  //speed of the winch becase the hooks will no longer deploy early if the
-    //speed of the arms excede the speed of the winch
+    DcMotor leftWinch;                   //in this version of TeleOp code there are no functions to control the
+    DcMotor rightWinch;                  //speed of the winch because the hooks will no longer deploy early if the
+                                         //speed of the arms exceeds the speed of the winch
 
     //motors for extending arms and spinner (debris collector)
     DcMotor arms;
@@ -105,10 +105,10 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     Servo allClear;                     //Standard Servo
 
     //variables for driving
-    double trailingPowerRight;                //this code allows us to always give slightly
-    double leadingPowerRight;                //less power to leading motor to always
-    double trailingPowerLeft;                //ensure tension between the treads and
-    double leadingPowerLeft;                //ground for maximum driver control
+    double trailingPowerRight;                  //this code allows us to always give slightly
+    double leadingPowerRight;                   //less power to leading motor to always
+    double trailingPowerLeft;                   //ensure tension between the treads and
+    double leadingPowerLeft;                    //ground for maximum driver control
 
     //servo variables for all clear servo
 
@@ -171,45 +171,64 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
         //THIS SHOULD ALL BE REORGANIZED IN ORDER OF IMPORTANCE
 
-        //gives name of magnetic sensors and LEDs for the configuration files
+        //gives name of magnetic sensors
+        //These magnetic sensors are placed on the arms of the robot which deploy the blocks into the
+        //bucket. They return true (1) when no magnet detected nearby false (0) when magnet detected
+        //These values get input into the variables armsNotExtended and armsNotRetracted
+        //These values are used for the LED indicators and, more importantly, when extending the arms.
+        //If the arms are not stopped correctly they have the potential to fly off the robot with their momentum.
+        //Adding the magnetic sensors to the conditional for extending the arms deals with that risk.
         sensorExtend = hardwareMap.digitalChannel.get("mag1");
         sensorRetract = hardwareMap.digitalChannel.get("mag2");
+
+        //configuration of the LED indicators
+        //These LEDs are placed on the outside of the robot in the view of the drivers so that they accurately know
+        //when the arms are fully extended or retracted.
         extendLED = hardwareMap.digitalChannel.get("led1");
         retractLED = hardwareMap.digitalChannel.get("led2");
-        extendLED.setMode(DigitalChannelController.Mode.OUTPUT);//the LEDs will be given a logical
-        retractLED.setMode(DigitalChannelController.Mode.OUTPUT);//output signal to turn on/off
-        retractLED.setState(false);                   // LEDs initialized "off"
-        extendLED.setState(false);
+        extendLED.setMode(DigitalChannelController.Mode.OUTPUT);        //the LEDs will be given a logical
+        retractLED.setMode(DigitalChannelController.Mode.OUTPUT);       //output signal to turn on/off
+        retractLED.setState(false);                                     //LEDs are initialized to (0) or "on"
+        extendLED.setState(false);                                      //to make sure that they are functioning
 
 
         //gives name of drive motors
-        driveLeftBack = hardwareMap.dcMotor.get("m5");      // 1 on red controller SN VUTK
-        driveLeftFront = hardwareMap.dcMotor.get("m6");     // 2 on red
+        driveLeftBack = hardwareMap.dcMotor.get("m5");              // 1 on red controller SN VUTK
+        driveLeftFront = hardwareMap.dcMotor.get("m6");             // 2 on red
 
-        driveRightBack = hardwareMap.dcMotor.get("m1");     // 1 on purple controller SN UVQF
-        driveRightFront = hardwareMap.dcMotor.get("m2");    // 2 on purple
+        driveRightBack = hardwareMap.dcMotor.get("m1");             // 1 on purple controller SN UVQF
+        driveRightFront = hardwareMap.dcMotor.get("m2");            // 2 on purple
 
         // set direction of L and R drive motors, since they are opposite-facing
-        driveRightFront.setDirection(DcMotor.Direction.FORWARD);  // LEFT side forward
-        driveRightBack.setDirection(DcMotor.Direction.FORWARD);   // with positive voltage
-        driveLeftBack.setDirection(DcMotor.Direction.REVERSE);    // so we reverse the RIGHT side
-        driveLeftFront.setDirection(DcMotor.Direction.REVERSE);
+
+        driveRightFront.setDirection(DcMotor.Direction.FORWARD);    // LEFT side forward
+        driveRightBack.setDirection(DcMotor.Direction.FORWARD);     // with positive voltage
+        driveLeftBack.setDirection(DcMotor.Direction.REVERSE);      // so we reverse the RIGHT side
+        driveLeftFront.setDirection(DcMotor.Direction.REVERSE);     //THIS CONFIGURATION NEEDS TO BE CHECKED
+
+        //The encoders on the robot are present on an idler wheel within the tread to get the actual distance
+        //and not simply the amount of rotations on the motor. The motor clicks can not be used to calculate
+        //a true distance.
+        //Other encoders are found on the actual motors on two of the motors within the tread.
+        //Encoders are not currently used during TeleOp operation
 
         //gives motor names for the other motors
-        arms = hardwareMap.dcMotor.get("m7");               // 1 on green controller SN VF7F
-        spin = hardwareMap.dcMotor.get("m8");              // 2 on green
+        arms = hardwareMap.dcMotor.get("m7");                       // 1 on green controller SN VF7F
+        spin = hardwareMap.dcMotor.get("m8");                       // 2 on green
 
         //gives names of winch motors in the configuration files
-        leftWinch = hardwareMap.dcMotor.get("m4");         // 1 on orange controller SN XTJI
-        rightWinch = hardwareMap.dcMotor.get("m3");        // 2 on orange
+        leftWinch = hardwareMap.dcMotor.get("m4");                  // 1 on orange controller SN XTJI (retract[+])
+        rightWinch = hardwareMap.dcMotor.get("m3");                 // 2 on orange (extend [-])
 
         //give the servo names for the servos
-        grabLeft = hardwareMap.servo.get("s1");             // xx on servo controller SN VSI1
-        grabRight = hardwareMap.servo.get("s2");            // xx on servo controller
+        grabLeft = hardwareMap.servo.get("s1");                     // xx on servo controller SN VSI1
+        grabRight = hardwareMap.servo.get("s2");                    // xx on servo controller
         hangArms = hardwareMap.servo.get("s3");
         hopper = hardwareMap.servo.get("s4");
         windowWiper = hardwareMap.servo.get("s5");
         shelterDrop = hardwareMap.servo.get("s6");
+
+        //how are we connecting the rest of the servos??
         allClear = hardwareMap.servo.get("s7");
 
         //sets initial positions for the servos to activate to
@@ -234,15 +253,42 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
     @Override
     public void loop() {
+
+        /*
+            SETTING MAGNETIC SENSORS
+        */
+
         //creates boolean value for magnetic sensor,
         //true (1)= no magnet detected nearby
-        //false (0) = magnet detected
+        //false (0) = magnet detected -> ARM HAS REACHED LIMIT
         armsNotExtended = sensorExtend.getState();
         armsNotRetracted = sensorRetract.getState();
 
-        //takes input from joysticks for motor values;
-        // sets the front wheel at a lesser power to ensure belt tension
+        /*
+            SETTING LED STATES
+        */
 
+        if (armsNotRetracted) {                 //set states of LED based on the positions of
+            retractLED.setState(false);         //the magnet sensor and magnet
+        } else {
+            retractLED.setState(true);
+        }
+        if (armsNotExtended) {
+            extendLED.setState(false);
+        } else {
+            extendLED.setState(true);
+        }
+
+        /*
+            ASSIGNING RED OR BLUE TEAM
+        */
+
+
+        //The driver can assign either red or blue by clicking the Red (B) button or the
+        // Blue button (X)
+        //This will be done in TeleOp because :
+        //  1. I dont know if it is possible in init
+        //  2. It cannot be reversed if it is only in init
         if ((gamepad1.back && gamepad1.x) || (gamepad2.back && gamepad2.x)) {
 
             redTeam = false;
@@ -254,7 +300,13 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
             redTeam = true;
 
         }
+        /*
+            SETTING VARIABLE GAINS
+        */
 
+        //takes input from joysticks for motor values;
+        // sets the front wheel at a lesser power to ensure belt tension
+        //If the driver moves the joystick upward the motors get a negative power.
         joystick1ValueLeft = gamepad1.left_stick_y;
         joystick1ValueRight = gamepad1.right_stick_y;
 
@@ -278,46 +330,45 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         trailingPowerRight = joystick1ValueRight * joystickGainR;
         leadingPowerRight = .95 * trailingPowerRight;
 
-        //Left motors and powers
+        /*
+            SETTING LEFT POWERS AND DEADZONES
+        */
 
-        if (leadingPowerLeft > 0.1) {                         // ignore dead zone on joystick
-            driveLeftBack.setPower(trailingPowerLeft);        //dead zone is the area right next to 0,
-            driveLeftFront.setPower(leadingPowerLeft);        //but not 0, where the motors are still
-        } else if (leadingPowerLeft < -0.1) {                 //straining to run
+        //Here we assign the leading powers to the motor that
+        //is in front according to the direction of the robot
+        //and the trailing motor value to the back. This is determined
+        //using the values of the joystick. The dead zone is between
+        //-0.1 and 0.1
+        if (leadingPowerLeft > 0.1) {                         //left treads driving forward
+            driveLeftBack.setPower(trailingPowerLeft);
+            driveLeftFront.setPower(leadingPowerLeft);
+        } else if (leadingPowerLeft < -0.1) {                 //left tread moving backward
             driveLeftBack.setPower(leadingPowerLeft);
-            driveLeftFront.setPower(trailingPowerLeft);       //Here we assign the leading powers to the motor that
-        } else {                                              //is in front according to the direction of the robot
-            driveLeftFront.setPower(0);                       //and the trailing motor value to the back. This is determined
-            driveLeftBack.setPower(0);                        //using the values of the joystick. The dead zone is between
-        }                                                     //-0.1 and 0.1
+            driveLeftFront.setPower(trailingPowerLeft);
+        } else {                                              //ignore very low powers
+            driveLeftFront.setPower(0);
+            driveLeftBack.setPower(0);
+        }
 
-        //right motors and powers
+        /*
+            SETTING RIGHT POWERS AND DEADZONES
+        */
 
-        if (leadingPowerRight > 0.1) {
+        if (leadingPowerRight > 0.1) {                      //right tread moving forward
             driveRightBack.setPower(trailingPowerRight);
             driveRightFront.setPower(leadingPowerRight);
-        } else if (leadingPowerRight < -0.1) {
+        } else if (leadingPowerRight < -0.1) {              //right tread moving backward
             driveRightBack.setPower(leadingPowerRight);
             driveRightFront.setPower(trailingPowerRight);
-        } else {
+        } else {                                            //ignore very low values
             driveRightBack.setPower(0);
             driveRightFront.setPower(0);
         }
 
-        //set LED states
-        if (armsNotRetracted) {                 //set states of LED based on the positions of
-            retractLED.setState(false);         //the magnet sensor and magnet
-        } else {
-            retractLED.setState(true);
-        }
-        if (armsNotExtended) {
-            extendLED.setState(false);
-        } else {
-            extendLED.setState(true);
-        }
+        /*
+              SPINNER AND HOPPER FUNCTIONALITY
+        */
 
-
-        //takes input from buttons for spin motors
         if (gamepad2.a) {                   //collect debris
             spin.setPower(-1);
 
@@ -350,7 +401,10 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
         hopper.setPosition(hopperPower);
 
-        //window wiper code
+        /*
+            WINDOW WIPER (SWEEP AWAY BLOCKS)
+        */
+
         if (gamepad1.a) {
             windowWiperPosition = windowWiperOpened;
         } else {
@@ -358,6 +412,10 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         }
 
         windowWiper.setPosition(windowWiperPosition);
+
+          /*
+            CHURRO GRABBERS ARE SET
+          */
 
         //takes input from bumpers and triggers for the locking grab motors set individually
         if (gamepad1.right_bumper) {
@@ -373,7 +431,7 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
             grabLeft.setPosition(grabLeftDown);
         }
 
-        //hang servo extention
+        //hang servo extension
         if (gamepad2.left_trigger > 0.3 && gamepad2.right_trigger > 0.3 && this.getRuntime() > 90)
         {
             hangPosition = hangOut;
