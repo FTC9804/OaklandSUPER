@@ -14,29 +14,15 @@ import com.qualcomm.robotcore.hardware.Servo;
  *v2 3-11-16 at 9:00 pm Etienne L. --added comments from teleop comments
  *v2 3-15-16 at 12:00 pm Etienne L. --added comments from teleop comments
  *v2 3-15-16 @ 5:27 pm Etienne L. --added gamepad comments
+ *v2 3-17-16 @ 5:59 pm Etienne L. --changed hopper variable names & beacon dump
+ *      -> editied up to lines 123-126 On OpMode Teleop v1
  */
 
 //////////////~~~ALL GAMEPAD CONTROLS~~~//////////////
 //true as of March 15th 2016 @ 4:44 PM
  /*
 
-*************GUNNER*************
--Left Trigger             ->    left winch in
--Right Trigger            ->    right winch in
--Left Bumper              ->    left winch out
--Right Bumper             ->    left winch out
--Dpad UP                  ->    shelter drop forward
--Dpad DOWN                ->    shelter drop back
--Dpad RIGHT               ->    move zipline bar right
--Dpad LEFT                ->    move zipline bar left
--|Y|ellow Button          ->    eject debris
--|X|enon (blue) Button    ->    select blue alliance
--|R|ed Button             ->    select red alliance
--|A|pple (green) Button   ->    collect debris
--Right Joystick           ->    arms extend (up[-]) and retract (down[+])
--Left Joystick            ->    NOT USED
-
-*************DRIVER*************
+*************DRIVER************* #1
 -Left Trigger             ->    left grabber down
 -Right Trigger            ->    right grabber down
 -Left Bumper              ->    left grabber up
@@ -47,10 +33,26 @@ import com.qualcomm.robotcore.hardware.Servo;
 -Dpad LEFT                ->    hook poles back
 -|Y|ellow Button          ->    all clear function (pending)
 -|X|enon (blue) Button    ->    hopper run right
--|R|ed Button             ->    hopper run left
+-|B|rick (red) Button     ->    hopper run left
 -|A|pple (green) Button   ->    window wiper
 -Right Joystick           ->    right tread (forward [+ after reversal]) (backward [-after reversal])
 -Left Joystick            ->    left tread (forward [+] backward [-])
+
+*************GUNNER************* #2
+-Left Trigger             ->    left winch in
+-Right Trigger            ->    right winch in
+-Left Bumper              ->    left winch out
+-Right Bumper             ->    left winch out
+-Dpad UP                  ->    shelter drop forward
+-Dpad DOWN                ->    shelter drop back
+-Dpad RIGHT               ->    move zipline bar right
+-Dpad LEFT                ->    move zipline bar left
+-|Y|ellow Button          ->    eject debris
+-|X|enon (blue) Button    ->    select blue alliance
+-|B|rick (red) Button     ->    select red alliance
+-|A|pple (green) Button   ->    collect debris
+-Right Joystick           ->    arms extend (up[-]) and retract (down[+])
+-Left Joystick            ->    NOT USED
 
  */
 
@@ -69,14 +71,14 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     DcMotor driveLeftFront;              //requires that the leading or front motor is powered at 95% of what
     DcMotor driveRightBack;              // the Back or trailing motor is powered. Further on the right motors
     DcMotor driveRightFront;             // are reversed because the left side goes forward with positive values.
-                                         // back or front DOES depend on which direction you are driving
-                                         //this is addressed later on in one statement while avoiding the joystick
-                                         //deadzones.
+    // back or front DOES depend on which direction you are driving
+    //this is addressed later on in one statement while avoiding the joystick
+    //deadzones.
 
     //winch motors
     DcMotor leftWinch;                   //in this verison of teleop code there are no functions to control the
     DcMotor rightWinch;                  //speed of the winch becase the hooks will no longer deploy early if the
-                                         //speed of the arms excede the speed of the winch
+    //speed of the arms excede the speed of the winch
 
     //motors for extending arms and spinner (debris collector)
     DcMotor arms;
@@ -91,7 +93,7 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     Servo hopper;                          //CR servo
 
     //servo for autonomous for the climbers
-    Servo beaconDump;                   //CR servo
+    Servo shelterDrop;                   //CR servo IMPORTANT THIS HAS NOT BEEN ADDED YET
 
     //servo to activate the hanger grabbers
     Servo hangArms;                     //CR servo
@@ -126,36 +128,39 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     double hangPosition = hangIn;
 
     //servo variable for continuous rotation hopper servo
-    double hopperMovingDown = 0.8;
-    double hopperMovingUp = 0.2;
-    double hopperStopMoving = 0.51;
-    double hopperPower = 0.51;
+    double runHopperLeft = 1.0;             //according to the google doc a value of 255 scores when on red.
+    double runHopperRight = 0.0;            //running these servos at full speed (CR servos)
+    double hopperStopMoving = 0.51;         //this value is at 0.51 because the servo on the original hopper
+    double hopperPower = 0.51;              //was not stopping entirely at 0.5 value
 
     //servo variables to place the climber into the dump area behind the beacon in auto
-    double beaconDumpScored = 0.0;
-    double beaconDumpRetracted = 1.0;
-    double beaconDumpPosition = beaconDumpRetracted;
+    double shelterDropScored = 0.0;
+    double shelterDropRetracted = 1.0;
+    double shelterDropPosition = shelterDropRetracted;
 
     //servo variables for the window wiper to sweep away blocks from the ramp
-    double windowWiperOpened = 0.75;
+    double windowWiperOpened = 0.75;        //THIS VALUE FOR OPENING WAS ON THE ORIGINAL TELEOP ~NEEDS TESTING
     double windowWiperClosed = 0;
     double windowWiperPosition = windowWiperClosed;
 
 
     //gives the state of the magnet sensors for the LED activation and ability to stop the motors
     boolean armsNotExtended = true;    // state of magnetic sensors to false to light up
-    boolean armsNotRetracted = true;    //for initialization sequence
+    boolean armsNotRetracted = true;   //for initialization sequence
 
     //variables for the winch motors to allow automatic control with manual override
-    double leftWinchSpeed = 0;
-    double rightWinchSpeed = 0;
+    double leftWinchPower = 0;
+    double rightWinchPower = 0;
 
+    //These joysticks are the initial gains that are assigned to the driver control
     double joystickGainR = 1;
     double joystickGainL = 1;
 
     double joystick1ValueRight;
     double joystick1ValueLeft;
 
+    //these values are used later on for the hopper servo when collecting and spinning
+    //red and blue are the only two possibilities
     boolean redTeam = true;
     boolean blueTeam = false;
 
@@ -163,6 +168,8 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
     public void init() {
 
         //NAMES FOR CONFIGURATION FILES ON ZTE PHONES
+
+        //THIS SHOULD ALL BE REORGANIZED IN ORDER OF IMPORTANCE
 
         //gives name of magnetic sensors and LEDs for the configuration files
         sensorExtend = hardwareMap.digitalChannel.get("mag1");
@@ -202,7 +209,7 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         hangArms = hardwareMap.servo.get("s3");
         hopper = hardwareMap.servo.get("s4");
         windowWiper = hardwareMap.servo.get("s5");
-        beaconDump = hardwareMap.servo.get("s6");
+        shelterDrop = hardwareMap.servo.get("s6");
         allClear = hardwareMap.servo.get("s7");
 
         //sets initial positions for the servos to activate to
@@ -211,7 +218,7 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         windowWiper.setPosition(windowWiperClosed);
         hopper.setPosition(hopperStopMoving);
         hangArms.setPosition(hangIn);
-        beaconDump.setPosition(beaconDumpPosition);
+        shelterDrop.setPosition(shelterDropPosition);
         allClear.setPosition(allClearPosition);
 
         this.resetStartTime();     //reset to allow time for servos to reach initialized positions
@@ -315,9 +322,9 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
             spin.setPower(-1);
 
             if (blueTeam) {
-                hopperPower = hopperMovingUp;
+                hopperPower = runHopperLeft;
             } else {
-                hopperPower = hopperMovingDown;
+                hopperPower = runHopperRight;
             }
 
         } else if (gamepad2.y) {            //eject or sweep away debris
@@ -327,12 +334,12 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
         } else if (gamepad1.x) {
 
-            hopperPower = hopperMovingUp;
+            hopperPower = runHopperLeft;
             spin.setPower(0);
 
         } else if (gamepad1.b) {
 
-            hopperPower = hopperMovingDown;
+            hopperPower = runHopperRight;
             spin.setPower(0);
 
         } else {
@@ -378,9 +385,9 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
         //all clear servo extension
         if (gamepad2.dpad_right){
-            allClearPosition = allClearUp
+            allClearPosition = allClearUp;
         } else if (gamepad2.dpad_left) {
-          allClearPosition = allClearDown
+            allClearPosition = allClearDown;
         }
         allClear.setPosition(allClearPosition);
 
@@ -398,17 +405,17 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         }
 
         if (gamepad2.left_stick_y > .1 || gamepad2.left_stick_y < -.1) {    //allow manual
-            leftWinchSpeed = gamepad2.left_stick_y;                         //override of the winch
+            leftWinchPower = gamepad2.left_stick_y;                         //override of the winch
         }                                                                   //motors when driver
         if (gamepad2.right_stick_y > .1 || gamepad2.right_stick_y < -.1) {  //wants control
-            rightWinchSpeed = gamepad2.right_stick_y;
+            rightWinchPower = gamepad2.right_stick_y;
         } else {
-            leftWinchSpeed = 0;
-            rightWinchSpeed = 0;
+            leftWinchPower = 0;
+            rightWinchPower = 0;
         }
 
-        rightWinch.setPower(rightWinchSpeed);           //sets power of the winches to the
-        leftWinch.setPower(leftWinchSpeed);             //specified power
+        rightWinch.setPower(rightWinchPower);           //sets power of the winches to the
+        leftWinch.setPower(leftWinchPower);             //specified power
 
     }//finish loop
 
