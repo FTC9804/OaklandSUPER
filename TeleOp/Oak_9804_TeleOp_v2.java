@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *v2 3-15-16 @ 5:27 pm Etienne L. --added gamepad comments
  *v2 3-17-16 @ 5:59 pm Etienne L. --changed hopper variable names & beacon dump
  *      -> editied up to lines 123-126 On OpMode Teleop v1
+ *v2 3-18-16 @ 4:54 pm Etienne L --addressing comments
  */
 
 //////////////~~~ALL GAMEPAD CONTROLS~~~//////////////
@@ -161,6 +162,7 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
 
     //these values are used later on for the hopper servo when collecting and spinning
     //red and blue are the only two possibilities
+    //This function COULD be made to use one variable but we use two for READING purposes
     boolean redTeam = true;
     boolean blueTeam = false;
 
@@ -369,22 +371,34 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
               SPINNER AND HOPPER FUNCTIONALITY
         */
 
-        if (gamepad2.a) {                   //collect debris
-            spin.setPower(-1);
+        /*This program structure sets the spin and hopper functions in the same else loop which
+        means that the drivers cannot control each function individually. CHANGE THIS.*/
 
+        if (gamepad2.a) {
+            spin.setPower(-1);              //a negative value to the spin collects debris
+
+            //here if we are on the blue team or on the red team we need the collector box to work in different
+            //directions. This is a good place to use red and blue team values. I know it can be done with one variable.
             if (blueTeam) {
                 hopperPower = runHopperLeft;
+                //On the blue team, collection is to the left
             } else {
                 hopperPower = runHopperRight;
+                //On the red team, collection is to the right
             }
 
-        } else if (gamepad2.y) {            //eject or sweep away debris
+        } else if (gamepad2.y) {
 
             spin.setPower(1);
             hopperPower = hopperStopMoving;
 
+            //when the spinner is ejecting stuff we don't need the hopper to be collecting
+            //items, so we set the servo to stop moving.
+            //THIS NEEDS TO BE CHANGED BECAUSE WE NEED A DIFFERENT STOP VALUE FOR RED AND BLUE
+
         } else if (gamepad1.x) {
 
+            //this is just hopper functionality:
             hopperPower = runHopperLeft;
             spin.setPower(0);
 
@@ -420,9 +434,9 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         //takes input from bumpers and triggers for the locking grab motors set individually
         if (gamepad1.right_bumper) {
             grabRight.setPosition(grabRightUp);
-        } else if (gamepad1.right_trigger > .3) {       //these triggers are considered axis,
-            grabRight.setPosition(grabRightDown);       //but we effectively utilize them as
-        }                                               //buttons by using them like this
+        } else if (gamepad1.right_trigger > .3) {       //these triggers have full 0-1 ranges, but we use them as
+            grabRight.setPosition(grabRightDown);       //plain buttons by applying a threshold
+        }
 
 
         if (gamepad1.left_bumper) {
@@ -431,7 +445,12 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
             grabLeft.setPosition(grabLeftDown);
         }
 
-        //hang servo extension
+        /*
+                HANGING SERVO
+         */
+
+        //this conditional allows the hanging servos to deploy only in the last minute and a half of the game
+        //whn both of the gunners triggers are pressed fully. They can always be brought in using the bumpers
         if (gamepad2.left_trigger > 0.3 && gamepad2.right_trigger > 0.3 && this.getRuntime() > 90)
         {
             hangPosition = hangOut;
@@ -441,7 +460,10 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         }
         hangArms.setPosition(hangPosition);
 
-        //all clear servo extension
+        /*
+                ALL ClEAR SERVO
+         */
+
         if (gamepad2.dpad_right){
             allClearPosition = allClearUp;
         } else if (gamepad2.dpad_left) {
@@ -449,9 +471,11 @@ public class Oak_9804_TeleOp_v2 extends OpMode {
         }
         allClear.setPosition(allClearPosition);
 
-        // Arm and Winch extension
+        /*
+            ARM EXTENSION
+         */
 
-        if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms and winches with d-pad buttons,
+        if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms with d-pad buttons,
 
             arms.setPower(-1);
 
