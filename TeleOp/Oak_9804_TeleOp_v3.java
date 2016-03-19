@@ -15,8 +15,9 @@ import com.qualcomm.robotcore.hardware.Servo;
  *v2 3-15-16 at 12:00 pm Etienne L. --added comments from teleop comments
  *v2 3-15-16 @ 5:27 pm Etienne L. --added gamepad comments
  *v2 3-17-16 @ 5:59 pm Etienne L. --changed hopper variable names & beacon dump
- *      -> editied up to lines 123-126 On OpMode Teleop v1
+ *      -> edited up to lines 123-126 On OpMode Teleop v1
  *v2 3-18-16 @ 4:54 pm Etienne L --addressing comments
+ *v3 3-19-16 @ 10:50 am Etienne L. --starting version 3 with continuous gain
  */
 
 //////////////~~~ALL GAMEPAD CONTROLS~~~//////////////
@@ -72,14 +73,14 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
     DcMotor driveLeftFront;              //requires that the leading or front motor is powered at 95% of what
     DcMotor driveRightBack;              // the Back or trailing motor is powered. Further on the left motors
     DcMotor driveRightFront;             // are reversed because the right side goes forward with positive values.
-                                         // back or front DOES depend on which direction you are driving
-                                         //this is addressed later on in one statement while avoiding the joystick
-                                         //deadzones.
+    // back or front DOES depend on which direction you are driving
+    //this is addressed later on in one statement while avoiding the joystick
+    //deadzones.
 
     //winch motors
     DcMotor leftWinch;                   //in this version of TeleOp code there are no functions to control the
     DcMotor rightWinch;                  //speed of the winch because the hooks will no longer deploy early if the
-                                         //speed of the arms exceeds the speed of the winch
+    //speed of the arms exceeds the speed of the winch
 
     //motors for extending arms and spinner (debris collector)
     DcMotor arms;
@@ -110,7 +111,8 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
     double leadingPowerRight;                   //less power to leading motor to always
     double trailingPowerLeft;                   //ensure tension between the treads and
     double leadingPowerLeft;                    //ground for maximum driver control
-
+    double m = 1.0;                             //slope for the gain
+    double b = 0.3;                             //y intercept for the gain
     //servo variables for all clear servo
 
     double allClearUp = 0.0;
@@ -131,7 +133,9 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
     //servo variable for continuous rotation hopper servo
     double runHopperLeft = 1.0;             //according to the google doc a value of 255 scores when on red.
     double runHopperRight = 0.0;            //running these servos at full speed (CR servos)
-    double hopperStopMoving = 0.51;         //this value is at 0.51 because the servo on the original hopper
+    double hopperStopMovingRed = 0.51;      //this value is at 0.51 because the servo on the original hopper
+    double hopperStopMovingBlue = 0.49;
+    double hopperStopMoving = 0.5;          //this value is only used in init
     double hopperPower = 0.51;              //was not stopping entirely at 0.5 value
 
     //servo variables to place the climber into the dump area behind the beacon in auto
@@ -265,7 +269,6 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
         //false (0) = magnet detected -> ARM HAS REACHED LIMIT
         armsNotExtended = sensorExtend.getState();
         armsNotRetracted = sensorRetract.getState();
-
         /*
             SETTING LED STATES
         */
@@ -291,40 +294,37 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
         //This will be done in TeleOp because :
         //  1. I dont know if it is possible in init
         //  2. It cannot be reversed if it is only in init
-        if ((gamepad1.back && gamepad1.x) || (gamepad2.back && gamepad2.x)) {
+        if (gamepad2.x) {
 
             redTeam = false;
             blueTeam = true;
 
-        } else if ((gamepad1.back && gamepad1.b) || (gamepad2.back && gamepad2.b)) {
+        } else if (gamepad2.b) {
 
             blueTeam = false;
             redTeam = true;
 
         }
+
+
         /*
-            SETTING VARIABLE GAINS
+            SETTING CONTINUOUS GAIN
         */
+
+        public void TeleOpDrive(joystick1ValueRight, joystick1ValueLeft){
+
+        //JUST USE ONE VARIBLE
 
         //takes input from joysticks for motor values;
         // sets the front wheel at a lesser power to ensure belt tension
         //If the driver moves the joystick upward the motors get a negative power.
-        joystick1ValueLeft = gamepad1.left_stick_y;
-        joystick1ValueRight = gamepad1.right_stick_y;
 
-        if (Math.abs(joystick1ValueLeft) >= 0.1 && Math.abs(joystick1ValueLeft) < 0.4) {
-            joystickGainL = 0.4;
-        } else if (Math.abs(joystick1ValueLeft) >= 0.4 && Math.abs(joystick1ValueLeft) < 0.7) {
-            joystickGainL = 0.7;
-        } else {
-            joystickGainL = 1;
+        if ((((Math.abs(joystick1ValueLeft)) >= 0.1))&&(((Math.abs(joystick1ValueLeft))<=0.7))){
+            joystickGainL = m*joystick1ValueLeft + b;
         }
-        if (Math.abs(joystick1ValueRight) >= 0.1 && Math.abs(joystick1ValueRight) < 0.4) {
-            joystickGainR = 0.4;
-        } else if (Math.abs(joystick1ValueRight) >= 0.4 && Math.abs(joystick1ValueRight) < 0.7) {
-            joystickGainR = 0.7;
-        } else {
-            joystickGainR = 1;
+
+        if ((((Math.abs(joystick1ValueRight)) >= 0.1))&&(((Math.abs(joystick1ValueRight))<=0.7))){
+            joystickGainR = m*joystick1ValueRight + b;
         }
 
         trailingPowerLeft = joystick1ValueLeft * joystickGainL;
@@ -341,6 +341,7 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
         //and the trailing motor value to the back. This is determined
         //using the values of the joystick. The dead zone is between
         //-0.1 and 0.1
+
         if (leadingPowerLeft > 0.1) {                         //left treads driving forward
             driveLeftBack.setPower(trailingPowerLeft);
             driveLeftFront.setPower(leadingPowerLeft);
@@ -351,6 +352,11 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
             driveLeftFront.setPower(0);
             driveLeftBack.setPower(0);
         }
+
+    }
+        joystick1ValueLeft = gamepad1.left_stick_y;
+        joystick1ValueRight = gamepad1.right_stick_y;
+
 
         /*
             SETTING RIGHT POWERS AND DEADZONES
@@ -390,11 +396,15 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
         } else if (gamepad2.y) {
 
             spin.setPower(1);
-            hopperPower = hopperStopMoving;
+
+            if (blueTeam) {
+                hopperPower = hopperStopMovingBlue;
+            } else {
+                hopperPower = hopperStopMovingRed;
+            }
 
             //when the spinner is ejecting stuff we don't need the hopper to be collecting
             //items, so we set the servo to stop moving.
-            //THIS NEEDS TO BE CHANGED BECAUSE WE NEED A DIFFERENT STOP VALUE FOR RED AND BLUE
 
         } else if (gamepad1.x) {
 
@@ -410,7 +420,12 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
         } else {
 
             spin.setPower(0);
-            hopperPower = hopperStopMoving;
+
+            if (blueTeam) {
+                hopperPower = hopperStopMovingBlue;
+            } else {
+                hopperPower = hopperStopMovingRed;
+            }
         }
 
         hopper.setPosition(hopperPower);
@@ -475,7 +490,7 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
             ARM EXTENSION
          */
 
-        if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms with d-pad buttons,
+        if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms with d-pad buttons, add time phased power
 
             arms.setPower(-1);
 
