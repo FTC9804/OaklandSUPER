@@ -311,13 +311,13 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
             SETTING CONTINUOUS GAIN
         */
 
+        public void TeleOpDrive(joystick1ValueRight, joystick1ValueLeft){
+
         //JUST USE ONE VARIBLE
 
         //takes input from joysticks for motor values;
         // sets the front wheel at a lesser power to ensure belt tension
         //If the driver moves the joystick upward the motors get a negative power.
-        joystick1ValueLeft = gamepad1.left_stick_y;
-        joystick1ValueRight = gamepad1.right_stick_y;
 
         if ((((Math.abs(joystick1ValueLeft)) >= 0.1))&&(((Math.abs(joystick1ValueLeft))<=0.7))){
             joystickGainL = m*joystick1ValueLeft + b;
@@ -352,6 +352,11 @@ public class Oak_9804_TeleOp_v3 extends OpMode {
             driveLeftFront.setPower(0);
             driveLeftBack.setPower(0);
         }
+
+    }
+        joystick1ValueLeft = gamepad1.left_stick_y;
+        joystick1ValueRight = gamepad1.right_stick_y;
+
 
         /*
             SETTING RIGHT POWERS AND DEADZONES
