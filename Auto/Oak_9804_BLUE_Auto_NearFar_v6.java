@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /*
- * FTC Team 9804 Bomb Squad Autonomous
+ * FTC Team 9804 Bomb Squad -- Autonomous
  * Made by the programmers of FTC Team 9804 Bomb Squad
  *
  * Drives a predetermined set distance
@@ -217,10 +217,12 @@ public class Oak_9804_BLUE_Auto_NearFar_v6 extends LinearOpMode {
         windowWiper.setPosition(sweepOpened);
         this.resetStartTime();
         while (this.getRuntime() < 1){ //give a short period of time for the hardware to execute the command
+            stopMotors();
         }
         windowWiper.setPosition(sweepClosed);
         this.resetStartTime();
         while (this.getRuntime() < 0.5) { //give a short period of time for the hardware to execute the command
+            stopMotors();
         }
 
     }
