@@ -41,7 +41,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
 
-
     //drive motors
     //front is the side with the arms, back is the side with the spinners
     DcMotor driveLeftBack;
@@ -57,6 +56,13 @@ public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
 
     //extra servo
     Servo box;
+
+    Servo shelterDrop; //0.5
+
+    Servo hookPoles;
+
+    Servo ziplineBar;   //0
+//    Servo allClear;     //not used
 
     //servo to push away debris from ramp
     Servo windowWiper;
@@ -93,6 +99,14 @@ public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
     double sweepClosed = 0;
     double sweepPosition = sweepClosed;
     double boxPosition = 0.5;
+    double hookPolesInitialize = 0.51;
+    double hookPolesPosition = hookPolesInitialize;
+    double shelterDropInitialize = 0.5;
+    double shelterDropPosition = shelterDropInitialize;
+    double ziplineBarInitialize = 0;
+    double ziplineBarPosition = ziplineBarInitialize;
+//    double allClearInitialize = 0;
+//    double allClearPosition = allClearInitialize;
 
 
     //USE CONFIGURATION FILE 'JABBED' ON BOTH MAIN AND B PHONES
@@ -100,8 +114,6 @@ public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-        //USE CONFIGURATION FILE 'JABBED' ON BOTH MAIN AND B PHONES
 
 
         //gives name of drive motors
@@ -116,7 +128,9 @@ public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
         //2 encoders are on rear motors, two are mounted in tread module
 
         spin = hardwareMap.dcMotor.get("m8");
-        //give the servo names for the servos
+
+
+        //give the configuration names for the servos
         grabLeft = hardwareMap.servo.get("s1");             // xx on servo controller SN VSI1
         grabRight = hardwareMap.servo.get("s2");            // xx on servo controller
 
@@ -124,11 +138,22 @@ public class Oak_9804_BLUE_Auto_DELAY_NearNear_v6 extends LinearOpMode {
 
         box = hardwareMap.servo.get("s4");
 
+        hookPoles = hardwareMap.servo.get("s3");
+
+//        allClear = hardwareMap.servo.get("s7");
+        ziplineBar = hardwareMap.servo.get("s8");
+
+        shelterDrop = hardwareMap.servo.get("s6");
+
         //sets initial positions for the servos to activate to
         grabLeft.setPosition(grabLeftUp);
         grabRight.setPosition(grabRightUp);
         windowWiper.setPosition(sweepPosition);
         box.setPosition(boxPosition);
+        hookPoles.setPosition(hookPolesPosition);
+//        allClear.setPosition(allClearPosition);
+        ziplineBar.setPosition(ziplineBarPosition);
+        shelterDrop.setPosition(shelterDropPosition);
 
 
         ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
