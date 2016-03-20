@@ -264,6 +264,11 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     @Override
     public void loop() {
 
+            //Hook Poles
+            if (gamepad1.dpad_up){
+
+            }
+
             //
 
             /*
@@ -448,16 +453,31 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
                 arms.setPower(0);
             }
 
-            if (gamepad2.left_stick_y > .1 || gamepad2.left_stick_y < -.1) {    //allow manual
-                leftWinchPower = gamepad2.left_stick_y;                         //override of the winch
-            }                                                                   //motors when driver
-            if (gamepad2.right_stick_y > .1 || gamepad2.right_stick_y < -.1) {  //wants control
-                rightWinchPower = gamepad2.right_stick_y;
+             //retratcts bumper based on left and right values
+            if (gamepad2.left_trigger > 0.3) {
+                leftWinchPower = 1;
             } else {
                 leftWinchPower = 0;
-                rightWinchPower = 0;
             }
 
+            if (gamepad2.right_trigger > 0.3) {
+                rightWinchPower = 1;
+            } else {
+            leftWinchPower = 0;
+            }
+
+            //extends bumper based on left and right values
+            if (gamepad2.left_bumper) {
+                leftWinchPower = -1;
+            } else {
+                leftWinchPower = 0;
+            }
+
+            if (gamepad2.right_bumper) {
+                rightWinchPower = -1;
+            } else {
+                leftWinchPower = 0;
+            }
             rightWinch.setPower(rightWinchPower);           //sets power of the winches to the
             leftWinch.setPower(leftWinchPower);             //specified power
 
