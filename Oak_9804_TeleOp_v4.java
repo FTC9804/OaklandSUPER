@@ -164,6 +164,9 @@ public class Oak_9804_TeleOp_v4 extends OpMode {
     float joystick1ValueRight;
     float joystick1ValueLeft;
 
+    float joystick2ValueRight;
+    double joystick2GainRight = 1;
+
     //these values are used later on for the hopper servo when collecting and spinning
     //red and blue are the only two possibilities
     //This function COULD be made to use one variable but we use two for READING purposes
@@ -457,9 +460,6 @@ public class Oak_9804_TeleOp_v4 extends OpMode {
 
 }//finish loop
 
-    public void runArms(boolean extend, boolean retract){}
-
-
     /*DRIVING FUNCTION WITH CONTINUOUS GAIN AND LEADING & TRAILING VALUES*/
     public void TeleOpDrive(float joystick1ValueRight, float joystick1ValueLeft) {
 
@@ -520,7 +520,11 @@ public class Oak_9804_TeleOp_v4 extends OpMode {
         }
     }
 
+    public void ArmsForGunner(float joystick2ValueRight){
 
-
+        if ((((Math.abs(joystick2ValueRight)) >= 0.1)) && (((Math.abs(joystick2ValueRight)) <= 0.7))) {
+            joystick2GainRight = m * joystick2ValueRight + b;
+        }
+        }
 
 }//finish program
