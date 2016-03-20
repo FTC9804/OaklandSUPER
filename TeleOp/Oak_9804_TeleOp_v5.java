@@ -169,6 +169,9 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     float joystick2ValueRight;
     double joystick2GainRight = 1;
 
+    float ziplineHold;
+    float ziplineRelease;
+
     //these values are used later on for the hopper servo when collecting and spinning
     //red and blue are the only two possibilities
     //This function COULD be made to use one variable but we use two for READING purposes
@@ -264,12 +267,12 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     @Override
     public void loop() {
 
-            //Hook Poles
-            if (gamepad1.dpad_up){
-
+            //Zipline
+            if (gamepad2.dpad_left) {
+                ziplineBar.setPosition(ziplineHold);
+            } else if (gamepad2.dpad_right) {
+                ziplineBar.setPosition(ziplineRelease);
             }
-
-            //
 
             /*
                 SETTING MAGNETIC SENSORS
@@ -431,12 +434,12 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
                     ALL ClEAR SERVO
              */
 
-            if (gamepad2.dpad_right){
-                allClearPosition = allClearUp;
-            } else if (gamepad2.dpad_left) {
-                allClearPosition = allClearDown;
-            }
-            allClear.setPosition(allClearPosition);
+//            if (gamepad1.y){
+//                allClearPosition = allClearUp;
+//            } else if (gamepad2.dpad_left) {
+//                allClearPosition = allClearDown;
+//            }
+//            allClear.setPosition(allClearPosition);
 
             /*
                 ARM EXTENSION
