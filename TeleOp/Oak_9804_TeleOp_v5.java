@@ -1,4 +1,4 @@
-package com.qualcomm.ftcrobotcontroller.opmodes.BombSquadOpModes;
+package com.qualcomm.ftcrobotcontroller.opmodes;
 
 //import OpModes
 
@@ -154,6 +154,10 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     //gives the state of the magnet sensors for the LED activation and ability to stop the motors
     boolean armsNotExtended = true;    // state of magnetic sensors to false to light up
     boolean armsNotRetracted = true;   //for initialization sequence
+    double armsPower = 1;
+
+    float joystick2ValueRight;
+    double joystick2GainRight = 1;
 
     //variables for the winch motors to allow automatic control with manual override
     double leftWinchPower = 0;
@@ -165,9 +169,6 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
 
     float joystick1ValueRight;
     float joystick1ValueLeft;
-
-    float joystick2ValueRight;
-    double joystick2GainRight = 1;
 
     float ziplineHold;
     float ziplineRelease;
@@ -267,66 +268,74 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     @Override
     public void loop() {
 
-            //Zipline
-            if (gamepad2.dpad_left) {
-                ziplineBar.setPosition(ziplineHold);
-            } else if (gamepad2.dpad_right) {
-                ziplineBar.setPosition(ziplineRelease);
-            }
+        //Zipline
+        if (gamepad2.dpad_left) {
+            ziplineBar.setPosition(ziplineHold);
+        } else if (gamepad2.dpad_right) {
+            ziplineBar.setPosition(ziplineRelease);
+        }
 
             /*
                 SETTING MAGNETIC SENSORS
             */
 
-            //creates boolean value for magnetic sensor,
-            //true (1)= no magnet detected nearby
-            //false (0) = magnet detected -> ARM HAS REACHED LIMIT
-            armsNotExtended = sensorExtend.getState();
-            armsNotRetracted = sensorRetract.getState();
+        //creates boolean value for magnetic sensor,
+        //true (1)= no magnet detected nearby
+        //false (0) = magnet detected -> ARM HAS REACHED LIMIT
+        armsNotExtended = sensorExtend.getState();
+        armsNotRetracted = sensorRetract.getState();
             /*
                 SETTING LED STATES
             */
 
-            if (armsNotRetracted) {                 //set states of LED based on the positions of
-                retractLED.setState(false);         //the magnet sensor and magnet
-            } else {
-                retractLED.setState(true);
-            }
-            if (armsNotExtended) {
-                extendLED.setState(false);
-            } else {
-                extendLED.setState(true);
-            }
+        if (armsNotRetracted) {                 //set states of LED based on the positions of
+            retractLED.setState(false);         //the magnet sensor and magnet
+        } else {
+            retractLED.setState(true);
+        }
+        if (armsNotExtended) {
+            extendLED.setState(false);
+        } else {
+            extendLED.setState(true);
+        }
 
             /*
                 ASSIGNING RED OR BLUE TEAM
             */
 
 
-            //The driver can assign either red or blue by clicking the Red (B) button or the
-            // Blue button (X)
-            //This will be done in TeleOp because :
-            //  1. I dont know if it is possible in init
-            //  2. It cannot be reversed if it is only in init
-            if (gamepad2.x) {
+        //The driver can assign either red or blue by clicking the Red (B) button or the
+        // Blue button (X)
+        //This will be done in TeleOp because :
+        //  1. I dont know if it is possible in init
+        //  2. It cannot be reversed if it is only in init
+        if (gamepad2.x) {
 
-                redTeam = false;
-                blueTeam = true;
+            redTeam = false;
+            blueTeam = true;
 
-            } else if (gamepad2.b) {
+        } else if (gamepad2.b) {
 
-                blueTeam = false;
-                redTeam = true;
+            blueTeam = false;
+            redTeam = true;
 
-            }
+        }
 
             /* ALL DRIVING IS CALLED HERE. GAMEPAD VALUES ARE PASSED AS PARAMETERS */
 
-            if (((Math.abs(gamepad1.right_stick_y))>0.1)||((Math.abs(gamepad1.left_stick_y))>0.1)){
+        if (((Math.abs(gamepad1.right_stick_y))>0.1)||((Math.abs(gamepad1.left_stick_y))>0.1)){
 
-                TeleOpDrive(gamepad1.right_stick_y, gamepad1.left_stick_y);
+            TeleOpDrive(gamepad1.right_stick_y, gamepad1.left_stick_y);
 
-            }
+        } else {
+
+            driveLeftFront.setPower(0.0);
+            driveLeftBack.setPower(0.0);
+            driveRightBack.setPower(0.0);
+            driveRightFront.setPower(0.0);
+
+
+        }
 
             /*
                   SPINNER AND HOPPER FUNCTIONALITY
@@ -335,100 +344,100 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
             /*This program structure sets the spin and hopper functions in the same else loop which
             means that the drivers cannot control each function individually. CHANGE THIS.*/
 
-            if (gamepad2.a) {
-                spin.setPower(-1);              //a negative value to the spin collects debris
+        if (gamepad2.a) {
+            spin.setPower(-1);              //a negative value to the spin collects debris
 
-                //here if we are on the blue team or on the red team we need the collector box to work in different
-                //directions. This is a good place to use red and blue team values. I know it can be done with one variable.
-                if (blueTeam) {
-                    hopperPower = runHopperLeft;
-                    //On the blue team, collection is to the left
-                } else {
-                    hopperPower = runHopperRight;
-                    //On the red team, collection is to the right
-                }
-
-            } else if (gamepad2.y) {
-
-                spin.setPower(1);
-
-                if (blueTeam) {
-                    hopperPower = hopperStopMovingBlue;
-                } else {
-                    hopperPower = hopperStopMovingRed;
-                }
-
-                //when the spinner is ejecting stuff we don't need the hopper to be collecting
-                //items, so we set the servo to stop moving.
-
-            } else if (gamepad1.x) {
-
-                //this is just hopper functionality:
+            //here if we are on the blue team or on the red team we need the collector box to work in different
+            //directions. This is a good place to use red and blue team values. I know it can be done with one variable.
+            if (blueTeam) {
                 hopperPower = runHopperLeft;
-                spin.setPower(0);
-
-            } else if (gamepad1.b) {
-
-                hopperPower = runHopperRight;
-                spin.setPower(0);
-
+                //On the blue team, collection is to the left
             } else {
-
-                spin.setPower(0);
-
-                if (blueTeam) {
-                    hopperPower = hopperStopMovingBlue;
-                } else {
-                    hopperPower = hopperStopMovingRed;
-                }
+                hopperPower = runHopperRight;
+                //On the red team, collection is to the right
             }
 
-            hopper.setPosition(hopperPower);
+        } else if (gamepad2.y) {
+
+            spin.setPower(1);
+
+            if (blueTeam) {
+                hopperPower = hopperStopMovingBlue;
+            } else {
+                hopperPower = hopperStopMovingRed;
+            }
+
+            //when the spinner is ejecting stuff we don't need the hopper to be collecting
+            //items, so we set the servo to stop moving.
+
+        } else if (gamepad1.x) {
+
+            //this is just hopper functionality:
+            hopperPower = runHopperLeft;
+            spin.setPower(0);
+
+        } else if (gamepad1.b) {
+
+            hopperPower = runHopperRight;
+            spin.setPower(0);
+
+        } else {
+
+            spin.setPower(0);
+
+            if (blueTeam) {
+                hopperPower = hopperStopMovingBlue;
+            } else {
+                hopperPower = hopperStopMovingRed;
+            }
+        }
+
+        hopper.setPosition(hopperPower);
 
             /*
                 WINDOW WIPER (SWEEP AWAY BLOCKS)
             */
 
-            if (gamepad1.a) {
-                windowWiperPosition = windowWiperOpened;
-            } else {
-                windowWiperPosition = windowWiperClosed;
-            }
+        if (gamepad1.a) {
+            windowWiperPosition = windowWiperOpened;
+        } else {
+            windowWiperPosition = windowWiperClosed;
+        }
 
-            windowWiper.setPosition(windowWiperPosition);
+        windowWiper.setPosition(windowWiperPosition);
 
               /*
                 CHURRO GRABBERS ARE SET
               */
 
-            //takes input from bumpers and triggers for the locking grab motors set individually
-            if (gamepad1.right_bumper) {
-                grabRight.setPosition(grabRightUp);
-            } else if (gamepad1.right_trigger > .3) {       //these triggers have full 0-1 ranges, but we use them as
-                grabRight.setPosition(grabRightDown);       //plain buttons by applying a threshold
-            }
+        //takes input from bumpers and triggers for the locking grab motors set individually
+        if (gamepad1.right_bumper) {
+            grabRight.setPosition(grabRightUp);
+        } else if (gamepad1.right_trigger > .3) {       //these triggers have full 0-1 ranges, but we use them as
+            grabRight.setPosition(grabRightDown);       //plain buttons by applying a threshold
+        }
 
 
-            if (gamepad1.left_bumper) {
-                grabLeft.setPosition(grabLeftUp);
-            } else if (gamepad1.left_trigger > .3) {
-                grabLeft.setPosition(grabLeftDown);
-            }
+        if (gamepad1.left_bumper) {
+            grabLeft.setPosition(grabLeftUp);
+        } else if (gamepad1.left_trigger > .3) {
+            grabLeft.setPosition(grabLeftDown);
+        }
 
             /*
                     HANGING SERVO
              */
 
-            //this conditional allows the hanging servos to deploy only in the last minute and a half of the game
-            //whn both of the gunners triggers are pressed fully. They can always be brought in using the bumpers
-            if (gamepad2.left_trigger > 0.3 && gamepad2.right_trigger > 0.3 && this.getRuntime() > 90)
-            {
-                hangPosition = hangOut;
-            }
-            else if (gamepad2.left_bumper && gamepad2.right_bumper){
-                hangPosition = hangIn;
-            }
-            hangArms.setPosition(hangPosition);
+        //this conditional allows the hanging servos to deploy only in the last minute and a half of the game
+        //whn both of the gunners triggers are pressed fully. They can always be brought in using the bumpers
+        if (gamepad2.left_trigger > 0.3 && gamepad2.right_trigger > 0.3 && this.getRuntime() > 90)
+        {
+            hangPosition = hangOut;
+        }
+        else if (gamepad2.left_bumper && gamepad2.right_bumper){
+            hangPosition = hangIn;
+        }
+        hangArms.setPosition(hangPosition);
 
             /*
                     ALL ClEAR SERVO
@@ -442,47 +451,51 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
 //            allClear.setPosition(allClearPosition);
 
             /*
-                ARM EXTENSION
+                ARM EXTENSION FOR GUNNER USING RIGHT JOYSICK
              */
 
-            if ((gamepad2.dpad_up || gamepad1.dpad_up) && armsNotExtended) {      //moves arms with d-pad buttons, add time phased power
+        if (Math.abs(gamepad2.right_stick_y) > 0.0){
 
-                arms.setPower(-1);
+            ArmsForGunner(gamepad2.right_stick_y);
 
-            } else if ((gamepad2.dpad_down || gamepad1.dpad_down) && armsNotRetracted) {
+        } else {
 
-                arms.setPower(1);
-            } else {
-                arms.setPower(0);
-            }
+            arms.setPower(0.0);
+        }
 
-             //retratcts bumper based on left and right values
-            if (gamepad2.left_trigger > 0.3) {
-                leftWinchPower = 1;
-            } else {
-                leftWinchPower = 0;
-            }
+        /*
+                ARM EXTENSION FOR DRIVER USING DPAD UP & DOWN
+         */
 
-            if (gamepad2.right_trigger > 0.3) {
-                rightWinchPower = 1;
-            } else {
+
+
+        //retratcts bumper based on left and right values
+        if (gamepad2.left_trigger > 0.3) {
+            leftWinchPower = 1;
+        } else {
             leftWinchPower = 0;
-            }
+        }
 
-            //extends bumper based on left and right values
-            if (gamepad2.left_bumper) {
-                leftWinchPower = -1;
-            } else {
-                leftWinchPower = 0;
-            }
+        if (gamepad2.right_trigger > 0.3) {
+            rightWinchPower = 1;
+        } else {
+            leftWinchPower = 0;
+        }
 
-            if (gamepad2.right_bumper) {
-                rightWinchPower = -1;
-            } else {
-                leftWinchPower = 0;
-            }
-            rightWinch.setPower(rightWinchPower);           //sets power of the winches to the
-            leftWinch.setPower(leftWinchPower);             //specified power
+        //extends bumper based on left and right values
+        if (gamepad2.left_bumper) {
+            leftWinchPower = -1;
+        } else {
+            leftWinchPower = 0;
+        }
+
+        if (gamepad2.right_bumper) {
+            rightWinchPower = -1;
+        } else {
+            leftWinchPower = 0;
+        }
+        rightWinch.setPower(rightWinchPower);           //sets power of the winches to the
+        leftWinch.setPower(leftWinchPower);             //specified power
 
     }//finish loop
 
@@ -546,10 +559,26 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         }
     }
 
+    /*ARMS FUNCTION FOR GUNNER USING CONTINUOUS GAIN*/
     public void ArmsForGunner(float joystick2ValueRight){
 
         if ((((Math.abs(joystick2ValueRight)) >= 0.1)) && (((Math.abs(joystick2ValueRight)) <= 0.7))) {
             joystick2GainRight = m * joystick2ValueRight + b;
+
+            armsPower = Math.abs(joystick2ValueRight * joystick2GainRight);
+
+            if (armsPower > 1.0){
+                armsPower = 1.0;
+            } else if (armsPower < -1.0){
+                armsPower = -1.0;
+            }
+
+            if ((joystick2ValueRight>0) && armsNotExtended) {
+                arms.setPower(armsPower);
+            } else if((joystick2ValueRight<0) && armsNotRetracted){
+                arms.setPower(-armsPower);
+            }
+
         }
     }
 
