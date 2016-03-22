@@ -21,7 +21,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  * Movement:
  * Drive for 3.75*2*sqrt(2)*12 = 127.279 inches backwards with spin motors running
- * Spins CCW 45º
+ * Spins CW 45º
  * Release climbers
  *
  * GENERAL RULE:
@@ -197,18 +197,30 @@ public class Oak_9804_BLUE_Auto_Climbers_v1 extends LinearOpMode {
             Thread.sleep(50);
         }
 
-
         driveStraightBackwards(0, 127.279, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
 
         stopMotors();
+
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
 
         spinMoveClockwise(-45); //the heading is incremental
 
         stopMotors();
 
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
+
         scoreShelterDrop(2);
 
         stopMotors();
+
 
         objectiveAttained();
 

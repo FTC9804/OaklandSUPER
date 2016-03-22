@@ -201,13 +201,32 @@ public class Oak_9804_RED_Auto_Climbers_v1 extends LinearOpMode {
 
         stopMotors();
 
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
+
         spinMoveCounterClockwise(45); //the heading is incremental
 
         stopMotors();
 
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
         scoreShelterDrop(2);
 
         stopMotors();
+
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
 
         objectiveAttained();
 

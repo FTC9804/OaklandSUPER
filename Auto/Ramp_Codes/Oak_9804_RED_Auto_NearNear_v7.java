@@ -207,15 +207,39 @@ public class Oak_9804_RED_Auto_NearNear_v7 extends LinearOpMode {
 
         stopMotors();
 
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
+
         spinMoveClockwise(-90); //the heading is incremental
 
         stopMotors();
 
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
         windowWiperActivate();
+
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
 
         driveStraightForwards(-90, 24, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
 
         stopMotors();
+
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
 
         objectiveAttained();
 

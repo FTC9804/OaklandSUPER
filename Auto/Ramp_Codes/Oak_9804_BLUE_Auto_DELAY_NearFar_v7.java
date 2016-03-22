@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Movement:
  * Delay 15 seconds
  * Drive for 1.5*2*sqrt(2)*12 = 50.9117 inches backwards with spin motors running
- * Spins CW 90º
+ * Spins CCW 90º
  * drive FORWARDS 24 inches
  * window wiper servo
  * drive FORWARDS 24 inches
@@ -214,17 +214,41 @@ public class Oak_9804_BLUE_Auto_DELAY_NearFar_v7 extends LinearOpMode {
 
         stopMotors();
 
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
         spinMoveCounterClockwise(90); //the heading is incremental
 
         stopMotors();
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
 
         driveStraightForwards(90, 24, 0.5);  //the distance is absolute, the heading is incremental, the mid power is absolute
 
         stopMotors();
 
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
+
         windowWiperActivate();
 
         stopMotors();
+
+        this.resetStartTime();
+        while (this.getRuntime() < 15) {
+            waitOneFullHardwareCycle();
+        }
+
 
         driveStraightForwards(90, 24, 0.5);  //the distance is absolute, the heading is incremental, the mid power is absolute
 
