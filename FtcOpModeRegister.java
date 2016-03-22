@@ -71,7 +71,7 @@ public class FtcOpModeRegister implements OpModeRegister {
       manager.register("RED_Auto_NearNear", Oak_9804_RED_Auto_NearNear_v4.class);
       manager.register("BLUE_Auto_NearFar", Oak_9804_BLUE_Auto_NearFar_v4.class);
       manager.register("BLUE_Auto_NearNear", Oak_9804_BLUE_Auto_NearNear_v4.class);
-
+      //manager.register("Oak_9804_TeleOp_v5", Oak_9804_TeleOp_v5.class);
 
     
 
