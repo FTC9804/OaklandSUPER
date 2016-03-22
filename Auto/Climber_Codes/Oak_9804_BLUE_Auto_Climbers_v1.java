@@ -232,8 +232,8 @@ public class Oak_9804_BLUE_Auto_Climbers_v1 extends LinearOpMode {
         do {
             shelterDrop.setPosition(shelterDropRelease);
         } while (this.getRuntime() < shelterScoreTime);
-        //sets the shelter drop back to 0
-        shelterDrop.setPosition(0.5);
+        //sets the shelter drop back to no power
+        shelterDrop.setPosition(shelterDropInitialize);
         //telemetry for phones about task finished
         telemetry.addData("SCORE CLIMBERS", telemetryVariable);
     }
