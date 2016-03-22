@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *v2 3-18-16 @ 4:54 pm Etienne L --addressing comments
  *v3 3-19-16 @ 10:50 am Etienne L. --starting version 3 with continuous gain
  *v5 3/20 @1:40 --
+ *v5 March 21, 2015 @ 4:56 Etienne L. & Bridget M.
  */
 
 //////////////~~~ALL GAMEPAD CONTROLS~~~//////////////
@@ -31,8 +32,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  -Right Bumper             ->    right grabber up                        (YES)
  -Dpad UP                  ->    arms extend (time phased power)         (YES)
  -Dpad DOWN                ->    arms retract (time phased power)        (YES)
- -Dpad RIGHT               ->    hook poles forward                      (NO)
- -Dpad LEFT                ->    hook poles back                         (NO)
+ -Dpad RIGHT               ->    hook poles forward                      (YES)
+ -Dpad LEFT                ->    hook poles back                         (YES)
  -|Y|ellow Button          ->    all clear function (pending)            (NO)
  -|X|enon (blue) Button    ->    hopper run right                        (YES)
  -|B|rick (red) Button     ->    hopper run left                         (YES)
@@ -44,8 +45,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  -Right Trigger            ->    right winch in (set hang arms to in)    (YES)
  -Left Bumper              ->    left winch out (set hang arms to out)   (YES)
  -Right Bumper             ->    left winch out (set hang arms to out)   (YES)
- -Dpad UP                  ->    shelter drop forward (arms)             (NO)
- -Dpad DOWN                ->    shelter drop back (arms)                (NO)
+ -Dpad UP                  ->    shelter drop forward (arms)             (YES)
+ -Dpad DOWN                ->    shelter drop back (arms)                (YES)
  -Dpad RIGHT               ->    move zipline bar right (all clear up)   (YESISH) -\
  -Dpad LEFT                ->    move zipline bar left (all clear down) zipline bar is s(8) >> 2 states, hold 0 and release 1... right is release left is hold
  -|Y|ellow Button          ->    eject debris                            (YES)
@@ -93,10 +94,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     Servo hopper;                          //CR servo
     
     //servo for autonomous for the climbers
-    Servo shelterDrop;                   //CR servo IMPORTANT THIS HAS NOT BEEN ADDED YET
-    
-    //servo to activate the hanger grabbers
-    Servo hangArms;                     //CR servo
+    Servo shelterDrop;                   //CR servo
     
     //servo for debris sweeping away
     Servo windowWiper;                  //Standard Servo
@@ -128,9 +126,9 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     double grabRightDown = 0.4;             //0.4 is approx. 90 degrees CCW (DOWN on right side)
     
     //servo variables for the hanging servo
-    double hangOut = 1.0;
-    double hangIn = 0.0;
-    double hangPosition = hangIn;
+    double hooksOut = 1.0;
+    double hooksIn = 0.0;
+    double hooksPosition = hooksIn;
     
     //servo variable for continuous rotation hopper servo
     double runHopperLeft = 1.0;             //according to the google doc a value of 255 scores when on red.
@@ -141,9 +139,10 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     double hopperPower = 0.51;              //was not stopping entirely at 0.5 value
     
     //servo variables to place the climber into the dump area behind the beacon in auto
-    double shelterDropScored = 0.0;
-    double shelterDropRetracted = 1.0;
-    double shelterDropPosition = shelterDropRetracted;
+    double shelterDropScore = 1.0;
+    double shelterDropRetract = 0.0;
+    double shelterDropPosition = shelterDropRetract;
+    double shelterDropStopped = 0.5;
     
     //servo variables for the window wiper to sweep away blocks from the ramp
     double windowWiperOpened = 0.75;        //THIS VALUE FOR OPENING WAS ON THE ORIGINAL TELEOP ~NEEDS TESTING
@@ -250,7 +249,6 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         grabRight.setPosition(grabRightUp);
         windowWiper.setPosition(windowWiperClosed);
         hopper.setPosition(hopperStopMoving);
-        hangArms.setPosition(hangIn);
         shelterDrop.setPosition(shelterDropPosition);
         allClear.setPosition(allClearPosition);
         
@@ -267,6 +265,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     
     @Override
     public void loop() {
+        
         
         /*
          ZIPLINE BAR
@@ -413,6 +412,18 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         windowWiper.setPosition(windowWiperPosition);
         
         /*
+         SHELTER DROP SERVO (CS)
+         */
+        
+        if (gamepad2.dpad_up){
+            shelterDrop.setPosition(shelterDropScore);
+        } else if (gamepad2.dpad_down){
+            shelterDrop.setPosition(shelterDropRetract);
+        } else {
+            shelterDrop.setPosition(shelterDropStopped);
+        }
+        
+        /*
          CHURRO GRABBERS ARE SET
          */
         
@@ -431,19 +442,17 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         }
         
         /*
-         HANGING SERVO
+         HOOKS SERVO
          */
         
-        //this conditional allows the hanging servos to deploy only in the last minute and a half of the game
-        //whn both of the gunners triggers are pressed fully. They can always be brought in using the bumpers
-        if (gamepad2.left_trigger > 0.3 && gamepad2.right_trigger > 0.3 && this.getRuntime() > 90)
+        if (gamepad1.dpad_right)
         {
-            hangPosition = hangOut;
+            hooksPosition = hooksOut;
         }
-        else if (gamepad2.left_bumper && gamepad2.right_bumper){
-            hangPosition = hangIn;
+        else if (gamepad1.dpad_left){
+            hooksPosition = hooksIn;
         }
-        hangArms.setPosition(hangPosition);
+        hookPoles.setPosition(hooksPosition);
         
         //            /*
         //                    ALL ClEAR SERVO
