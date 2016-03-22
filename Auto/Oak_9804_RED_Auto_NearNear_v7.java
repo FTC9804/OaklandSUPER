@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Back left edge of first full box from the mountain on the red side
  * Facing the shelter BACKWARDS
  *
+ *
  * Movement:
  * Drive for 2*sqrt(2)*12 = 33.94 inches backwards with spin motors running
  * Spins CW 90º
@@ -36,6 +37,36 @@ import com.qualcomm.robotcore.hardware.Servo;
  *  BWD: leftPower = midPower + drive Steering
  *  CCW: positive
  *  CW: negative
+ *
+ *
+ * Configuration Info
+ * SN           COLOR           NAME                    PORT            CONFIG. NAME
+ * UVQF         Purple          spin                    1               m8
+ * UVQF         Purple          arms                    2               m7
+ * XTJI         Orange          left winch              1               m4
+ * XTJI         Orange          right winch             2               m3
+ * VUTK         Red             driveRightFront         1               m2
+ * VUTK         Red             driveRightBack          2               m1
+ * VUTK         Red             right encoder           1
+ * VF7F         Green           driveLeftFront          1               m6
+ * VF7F         Green           driveLeftBack           2               m5
+ * VF7F         Green           left encoder            1
+ * VSI1         White           hookPoles               3               s3
+ * VSI1         White           grabRight               4               s2
+ * VSI1         White           box                     5               s4
+ * VSI1         White           grabLeft                6               s1
+ * VCT7         Pink            ziplineBar              5               s8
+ * VCT7         Pink            allClear (not used)     2               s7
+ * VCT7         Pink            shelterDrop             6               s6
+ * VCT7         Pink            windowWiper             1               s5
+ * VCFP         Yellow          gyro                    I2C5            gyro
+ * VCFP         Yellow          led extend              DO7             led1
+ * VCFP         Yellow          led retract             DO1             led2
+ * VCFP         Yellow          magnet extend           DO0             mag1
+ * VCFP         Yellow          magnet retract          DO2             mag2
+ *              Blue            Power Distro <-> Phones
+ *
+ *
  */
 
 
@@ -57,11 +88,11 @@ public class Oak_9804_RED_Auto_NearNear_v7 extends LinearOpMode {
     //extra servo
     Servo box;
 
-    Servo shelterDrop; //0.5
+    Servo shelterDrop;
 
     Servo hookPoles;
 
-    Servo ziplineBar;   //0
+    Servo ziplineBar;
 //    Servo allClear;     //not used
 
     //servo to push away debris from ramp
@@ -117,7 +148,7 @@ public class Oak_9804_RED_Auto_NearNear_v7 extends LinearOpMode {
 
 
         //gives name of drive motors
-        driveLeftBack = hardwareMap.dcMotor.get("m5");      // 1 on red controller SN VUTK
+        driveLeftBack = hardwareMap.dcMotor.get("m5");      // 1 on red SN VUTK
         driveLeftFront = hardwareMap.dcMotor.get("m6");     // 2 on red
         driveRightBack = hardwareMap.dcMotor.get("m1");     // 1 on purple controller SN UVQF
         driveRightFront = hardwareMap.dcMotor.get("m2");    // 2 on purple
