@@ -196,9 +196,6 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     double joystickGainR = 1;
     double joystickGainL = 1;
     
-    float joystick1ValueRight;          //these values are not needed because they are in the drivers function
-    float joystick1ValueLeft;
-    
     double ziplineHold = 1.0;           //hold is a value of 1. Contrary to normal rotation.
     double ziplineRelease = 0.0;
     
@@ -303,9 +300,9 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         //CHECK LOGIC WITH MECHANICAL!
         
         if (gamepad2.dpad_left) {
-            ziplineBar.setPosition(ziplineRelease);
+            ziplineBar.setPosition(ziplineRelease);         //sets the servo to the predetermined value necessary for release
         } else {
-            ziplineBar.setPosition(ziplineHold);
+            ziplineBar.setPosition(ziplineHold);            //sets the servo to the predetermined value necessary to hold
         }
         
         /*
@@ -361,7 +358,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
             TeleOpDrive(gamepad1.right_stick_y, gamepad1.left_stick_y);
             
         } else {
-            
+            //sets the default power to zero to prevent any mishaps
             driveLeftFront.setPower(0.0);
             driveLeftBack.setPower(0.0);
             driveRightBack.setPower(0.0);
@@ -392,7 +389,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         } else if (gamepad2.y) {
             
             spin.setPower(1);
-            
+            //makes sure hopper isnt moving while ejecting debris
             if (blueTeam) {
                 hopperPower = hopperStopMovingBlue;
             } else {
@@ -422,6 +419,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
             
             if (blueTeam) {
                 hopperPower = hopperStopMovingBlue;
+                //servos are different, therefore have different stopiing values
             } else {
                 hopperPower = hopperStopMovingRed;
             }
@@ -433,8 +431,10 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
          WINDOW WIPER (SWEEP AWAY BLOCKS)
          */
         
+        //default set to keeping sweeper inside
         if (gamepad1.a) {
             windowWiperPosition = windowWiperOpened;
+            //open and closed positions set in varibles at top of code
         } else {
             windowWiperPosition = windowWiperClosed;
         }
