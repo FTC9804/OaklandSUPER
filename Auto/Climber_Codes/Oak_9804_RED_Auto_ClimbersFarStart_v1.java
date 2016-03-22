@@ -11,8 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  * Drives a predetermined set distance
  *
- * v1 3-21-16 at 5:53 pm Steve -- initial test code for climber code
- * v2 3-22-16 at 1:33 pm Steve -- test code with "while(this.opModeIsActive())" loop
+ * v1 3-21-16 at 5:53 pm Steve -- initial test code for climber code with far start
  *
  *
  * SetUp:
@@ -63,7 +62,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
+public class Oak_9804_RED_Auto_ClimbersFarStart_v1 extends LinearOpMode {
 
     //drive motors
     //front is the side with the arms, back is the side with the spinners
@@ -199,7 +198,21 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
 
         while (this.opModeIsActive()) {
 
-            driveStraightBackwards(0, 101.823, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
+            driveStraightBackwards(0, 24, 0.5);
+
+            this.resetStartTime();
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            spinMoveClockwise(-45);
+
+            this.resetStartTime();
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            driveStraightBackwards(-45, 101.823, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
 
             stopMotors();
 
@@ -210,7 +223,7 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
             }
 
 
-            spinMoveCounterClockwise(45); //the heading is incremental
+            spinMoveCounterClockwise(0); //the heading is incremental
 
             stopMotors();
 

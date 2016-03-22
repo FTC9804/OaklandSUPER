@@ -16,13 +16,13 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  *
  * SetUp:
- * Back left edge of second full box from the mountain on the red side
+ * Back right edge of third full box from the mountain on the blue side
  * Facing the shelter BACKWARDS
  *
  *
  * Movement:
- * Drive for 3*2*sqrt(2)*12 = 101.823 inches backwards with spin motors running
- * Spins CCW 45º
+ * Drive for 3.75*2*sqrt(2)*12 = 127.279 inches backwards with spin motors running
+ * Spins CW 45º
  * Release climbers
  *
  * GENERAL RULE:
@@ -30,6 +30,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *  BWD: leftPower = midPower + drive Steering
  *  CCW: positive
  *  CW: negative
+ *  CR Servos: 1 is CW, 0 is CCW, 0.5 is stopped
  *
  *
  * Configuration Info
@@ -63,8 +64,10 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
+public class Oak_9804_BLUE_Auto_ClimbersLeaveShelter_v1 extends LinearOpMode {
 
+    final int encoderCountsPerRotation = 1120;  //AndyMark encoders use 1120 counts per revolution
+    final double diameter = 2.583;              //effective diameter of drive pulley and tread b/c of sinking into foam mat (measures 3" dia)
     //drive motors
     //front is the side with the arms, back is the side with the spinners
     DcMotor driveLeftBack;
@@ -73,24 +76,17 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
     DcMotor driveRightFront;
     //two encoders are on rear motors, 2 are mounted on tread module
     DcMotor spin;
-
     //servos to lock in place on ramp
     Servo grabLeft;
     Servo grabRight;
-
     //extra servo
     Servo box;
-
     Servo shelterDrop;
-
+    //    Servo allClear;     //not used
     Servo hookPoles;
-
     Servo ziplineBar;
-//    Servo allClear;     //not used
-
     //servo to push away debris from ramp
     Servo windowWiper;
-
     double midPower;                        //the middle power for driving that we add and subtract calculates values from
     int targetHeading;                      //target heading the gyro will go to
     double driveGain;                       //the gain for proportional control
@@ -102,11 +98,7 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
     double currentDistance;                 //the calculated distance we have travelled
     int currentEncDeltaCountLeft;           //the change (delta) for the left encoder
     int currentEncDeltaCountRight;          //the change (delta) for the right encoder
-
-
     double targetDistance;                      //magnitude in distance
-    final int encoderCountsPerRotation = 1120;  //AndyMark encoders use 1120 counts per revolution
-    final double diameter = 2.583;              //effective diameter of drive pulley and tread b/c of sinking into foam mat (measures 3" dia)
     double circumference = diameter * 3.14159;  //Circumference = PI * Diameter
     double rotations;                           //desired rotations
     int targetEncoderCounts;                    //calculated target encoder counts
@@ -199,7 +191,7 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
 
         while (this.opModeIsActive()) {
 
-            driveStraightBackwards(0, 101.823, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
+            driveStraightBackwards(0, 127.279, 0.5); //the distance is absolute, the heading is incremental, the mid power is absolute
 
             stopMotors();
 
@@ -209,29 +201,37 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
                 waitOneFullHardwareCycle();
             }
 
-
-            spinMoveCounterClockwise(45); //the heading is incremental
+            spinMoveClockwise(-45); //the heading is incremental
 
             stopMotors();
-
 
             this.resetStartTime();
             while (this.getRuntime() < 15 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
+
 
             scoreShelterDrop(2);
 
             stopMotors();
 
+            this.resetStartTime();
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            driveStraightForwards(-45, 12, 0.5);
 
             this.resetStartTime();
             while (this.getRuntime() < 15 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
-            objectiveAttained();
+            spinMoveCounterClockwise(45);
 
+            driveStraightBackwards(45, 24, 0.5);
+
+            objectiveAttained();
         }
 
     }//finish the opmode

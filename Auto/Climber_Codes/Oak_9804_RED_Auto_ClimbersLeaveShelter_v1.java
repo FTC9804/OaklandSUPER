@@ -11,8 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  *
  * Drives a predetermined set distance
  *
- * v1 3-21-16 at 5:53 pm Steve -- initial test code for climber code
- * v2 3-22-16 at 1:33 pm Steve -- test code with "while(this.opModeIsActive())" loop
+ * v1 3-21-16 at 5:53 pm Steve -- initial test code for climber code with leaving shelter to make room for partner
  *
  *
  * SetUp:
@@ -63,7 +62,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
+public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v1 extends LinearOpMode {
 
     //drive motors
     //front is the side with the arms, back is the side with the spinners
@@ -226,6 +225,31 @@ public class Oak_9804_RED_Auto_Climbers_v2 extends LinearOpMode {
 
 
             this.resetStartTime();
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            driveStraightForwards(45, 18, 0.5);
+
+            stopMotors();
+
+            this.resetStartTime();
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            spinMoveClockwise(-45);
+
+            stopMotors();
+
+            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+                waitOneFullHardwareCycle();
+            }
+
+            driveStraightBackwards(-45, 36, 0.5);
+
+            stopMotors();
+
             while (this.getRuntime() < 15 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
