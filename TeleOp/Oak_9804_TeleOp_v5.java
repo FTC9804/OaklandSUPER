@@ -86,6 +86,23 @@ import com.qualcomm.robotcore.hardware.Servo;
  -Left Joystick            ->    NOT USED (left winch)                                     (YES)
  */
 
+
+/* THINGS TO FIX AS OF MARCH 22, 2016 @ 1:35 PM
+
+
+FIXED? (YES/NO)
+
+        -Driver cannot drive                            (NO) --went over it, cannot see why it wont work
+        -Arms on gunner do not work                     (NO) --went over it, cannot see why it wont work
+        -Winch In on triggers do not work               (YES)--powers were not assigned, that is fixed
+        -Sweeper does not stop                          (YES)--sweeper now has else statement
+        ->Still need to test auto store for sweeper     (NO)
+
+        Maybe:
+        -Test arms stopping with D-Pad                  (Tentative YES)
+*/
+
+
 public class Oak_9804_TeleOp_v5 extends OpMode {
 
     //defining the motors, servos, and variables in this program
@@ -184,7 +201,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
     boolean armsNotRetracted = true;   //for initialization sequence
     double armsPower = 1;
 
-    float joystick2ValueRight;          //this value are not needed because they are in the drivers function
+    float joystick2ValueRight;          //this value is not needed because they are in the drivers function
     double joystick2GainRight = 1;
 
     //variables for the winch motors to allow automatic control with manual override
@@ -391,6 +408,12 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
             //when the spinner is ejecting stuff we don't need the hopper to be collecting
             //items, so we set the servo to stop moving.
 
+        } else {
+
+            spin.setPower(0.0);             //stop the spinner while not pressing the buttons
+                                            //do not stop the hopper here because if we do we will not be able
+                                            //to use it later on.
+
         }
 
         /*
@@ -521,37 +544,33 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
             arms.setPower(0);
         }
 
-        //retracts bumper based on left and right values
+        //retracts winch using the triggers
 
-        if (Math.abs(gamepad2.left_trigger) > 0.1) {
-            leftWinchPower = -gamepad2.left_trigger;
-        } else {
-            leftWinchPower = 0.0;
-        }
-
-        if (Math.abs(gamepad2.right_trigger) > 0.1){
+        //you cannot winch in and out at the same time on different winches
+        if (gamepad2.left_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
+            leftWinchPower = -gamepad2.left_trigger;        //a negative value to the winch will winch in
             rightWinchPower = -gamepad2.right_trigger;
-        }else{
-            rightWinchPower = 0.0;
         }
+        else if (gamepad2.right_bumper || gamepad2.left_bumper){
 
-        //extends bumper based on left and right values
-        // gunner will notice the lower power!
-        // (perhaps to notice he intended to winch in?!
+            //extends bumper based on left and right values
+            // gunner will notice the lower power!
+            // (perhaps to notice he intended to winch in?!
 
-        if (gamepad2.left_bumper) {
-            leftWinchPower = 0.3;
+            if (gamepad2.left_bumper) {
+                leftWinchPower = 0.3;
+            }
+
+            if (gamepad2.right_bumper) {
+                rightWinchPower = 0.3;
+            }
+
         } else {
+
             leftWinchPower = 0.0;
-        }
-
-        if (gamepad2.right_bumper) {
-            rightWinchPower = 0.3;
-        } else {
             rightWinchPower = 0.0;
+
         }
-        rightWinch.setPower(rightWinchPower);           //sets power of the winches to the
-        leftWinch.setPower(leftWinchPower);             //specified power
 
     }//finish loop
 
@@ -631,6 +650,8 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
                 arms.setPower(armsPower);
             } else if((joystick2ValueRight<0) && armsNotRetracted){
                 arms.setPower(-armsPower);
+            } else {
+                arms.setPower(0.0);
             }
 
         }
