@@ -241,7 +241,7 @@ public class Oak_9804_TeleOp_v5 extends OpMode {
         hopper = hardwareMap.servo.get("s4");
         windowWiper = hardwareMap.servo.get("s5");
         shelterDrop = hardwareMap.servo.get("s6");
-        allClear = hardwareMap.servo.get("s7");
+        //allClear = hardwareMap.servo.get("s7");
         ziplineBar = hardwareMap.servo.get("s8");
         
         //sets initial positions for the servos to activate to
