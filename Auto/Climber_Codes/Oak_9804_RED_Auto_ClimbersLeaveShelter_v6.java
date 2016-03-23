@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * v3 3-22-16 at 4:04 pm Steve -- update commenting
  * v4 3-22-16 at 6:24 pm Steve -- test code with update to exit while loop
  * v5 3-22-16 at 7:17 pm Steve -- test code with update with waitOneFullHardwareCycle(); added
+ * v6 3-22-16 at 9:29 pm Steve -- test code with updated delays to competition times
  *
  *
  * SetUp:
@@ -69,7 +70,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 
-public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
+public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v6 extends LinearOpMode {
 
     //drive motors
     //front is the side with the arms, back is the side with the spinners
@@ -221,7 +222,7 @@ public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
             waitOneFullHardwareCycle();
 
             this.resetStartTime();
-            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+            while (this.getRuntime() < 1.5 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
@@ -234,7 +235,7 @@ public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
             waitOneFullHardwareCycle();
 
             this.resetStartTime();
-            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+            while (this.getRuntime() < 1.5 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
@@ -247,7 +248,7 @@ public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
             waitOneFullHardwareCycle();
 
             this.resetStartTime();
-            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+            while (this.getRuntime() < 1.5 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
@@ -260,7 +261,7 @@ public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
             waitOneFullHardwareCycle();
 
             this.resetStartTime();
-            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+            while (this.getRuntime() < 1.5 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
@@ -272,7 +273,7 @@ public class Oak_9804_RED_Auto_ClimbersLeaveShelter_v5 extends LinearOpMode {
 
             waitOneFullHardwareCycle();
 
-            while (this.getRuntime() < 15 && this.opModeIsActive()) {
+            while (this.getRuntime() < 1.5 && this.opModeIsActive()) {
                 waitOneFullHardwareCycle();
             }
 
