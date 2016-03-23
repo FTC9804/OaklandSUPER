@@ -107,7 +107,7 @@ FIXED? (YES/NO)
 */
 
 
-public class Oak_9804_TeleOp_v6 extends OpMode {
+public class Oak_9804_TeleOp_v7 extends OpMode {
 
     //defining the motors, servos, and variables in this program
 
@@ -204,6 +204,7 @@ public class Oak_9804_TeleOp_v6 extends OpMode {
     boolean armsNotExtended = true;    // state of magnetic sensors to false to light up
     boolean armsNotRetracted = true;   //for initialization sequence
     double armsPower = 1;
+    double armsValue;
 
     float joystick2ValueRight;          //this value is not needed because they are in the drivers function
     double joystick2GainRight = 1;
@@ -470,49 +471,58 @@ public class Oak_9804_TeleOp_v6 extends OpMode {
             //here if we are on the blue team or on the red team we need the collector box to work in different
             //directions. This is a good place to use red and blue team values. I know it can be done with one variable.
             if (blueTeam) {
-                hopper.setPosition(runHopperLeft);
+                hopperPower = runHopperLeft;
                 //On the blue team, collection is to the left
             } else {
-                hopper.setPosition(runHopperRight);
+                hopperPower = runHopperRight;
                 //On the red team, collection is to the right
             }
 
         } else if (gamepad2.y) {
 
             spin.setPower(1);
-            //makes sure hopper isn't moving while ejecting debris
+            //makes sure hopper isnt moving while ejecting debris
             if (blueTeam) {
-                hopper.setPosition(hopperStopMovingBlue);
+                hopperPower = hopperStopMovingBlue;
             } else {
-                hopper.setPosition(hopperStopMovingRed);
+                hopperPower = hopperStopMovingRed;
             }
 
             //when the spinner is ejecting stuff we don't need the hopper to be collecting
             //items, so we set the servo to stop moving.
 
-        } else if (gamepad1.x) {
+        } else {
+
+            spin.setPower(0.0);             //stop the spinner while not pressing the buttons
+            //do not stop the hopper here because if we do we will not be able
+            //to use it later on.
+
+            if (blueTeam) {
+                hopperPower = hopperStopMovingBlue;
+                //servos are different, therefore have different stopiing values
+            } else {
+                hopperPower = hopperStopMovingRed;
+            }
+
+        }
+
+        /*
+         HOPPER INDEPENDENT RUN USING GAMEPAD1 X & B
+         */
+
+
+        if (gamepad1.x) {
 
             //this is just hopper functionality:
-            hopper.setPosition(runHopperLeft);
-            spin.setPower(0.0);
+            hopperPower = runHopperLeft;
 
         } else if (gamepad1.b) {
 
-            hopper.setPosition(runHopperRight);
-            spin.setPower(0.0);
+            hopperPower = runHopperRight;
 
-        } else {
-
-            spin.setPower(0.0);
-
-            if (blueTeam) {
-
-                hopper.setPosition(hopperStopMovingBlue);
-                //servos are different, therefore have different stopiing values
-            } else {
-                hopper.setPosition(hopperStopMovingRed);
-            }
         }
+
+        hopper.setPosition(hopperPower);
 
         /*
          WINDOW WIPER (SWEEP AWAY BLOCKS)
@@ -582,30 +592,33 @@ public class Oak_9804_TeleOp_v6 extends OpMode {
 
             joystick2GainRight = m * Math.abs(joystick2ValueRight) + b;
 
-            armsPower = Math.abs(joystick2ValueRight * joystick2GainRight);
+            armsValue = Math.abs(joystick2ValueRight * joystick2GainRight);
 
-            if (armsPower > 1.0){
-                armsPower = 1.0;
+            if (armsValue > 1.0){
+                armsValue = 1.0;
             }
 
             if ((joystick2ValueRight>0) && armsNotExtended) {
-                arms.setPower(-armsPower);
+                armsPower = -armsValue;
             } else if((joystick2ValueRight<0) && armsNotRetracted){
-                arms.setPower(armsPower);
+                armsPower = armsValue;
+            } else {
+                armsPower = 0.0;
             }
-            else if (gamepad1.dpad_up){
 
-         /*
+        /*
          ARM EXTENSION FOR DRIVER USING DPAD UP & DOWN
          */
-                arms.setPower(-0.4);            //negative value sends arms outward.
-            } else if (gamepad1.dpad_down){
+        if (gamepad1.dpad_up){
+            armsPower = -0.4;            //negative value sends arms outward.
+        } else if (gamepad1.dpad_down){
 
-                arms.setPower(0.4);             //positive value sends arms inward.
-            }
-            else {
-                arms.setPower(0);
-            }
+            armsPower = 0.4;             //positive value sends arms inward.
+        }
+
+        arms.setPower(armsPower);
+
+
 
         //retracts winch using the triggers
 
